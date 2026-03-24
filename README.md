@@ -22,6 +22,8 @@ That's it. `Install Orbit.bat` only needs to run once. After that, just use `Lau
 
 ## Quick Install (macOS / Linux)
 
+Open **Terminal** and run:
+
 ```bash
 git clone https://github.com/NachikethRamesh/Orbit_ProfessionalRelationshipManager.git
 cd Orbit_ProfessionalRelationshipManager
@@ -34,6 +36,14 @@ Then to launch Orbit anytime:
 ```bash
 ./launch-orbit.sh
 ```
+
+> **Want to double-click instead of using Terminal?** By default, macOS opens `.sh` files in Xcode as text. To fix this:
+> 1. Right-click `install-orbit.sh` in Finder
+> 2. Click **Get Info**
+> 3. Under **Open with**, change from Xcode to **Terminal.app**
+> 4. Click **Change All** to apply to all `.sh` files
+>
+> After that, double-clicking any `.sh` file will run it in Terminal — same as `.bat` on Windows.
 
 ---
 
