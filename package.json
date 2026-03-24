@@ -1,0 +1,63 @@
+{
+  "name": "orbit-personal-crm",
+  "version": "1.0.0",
+  "description": "Orbit — A locally-runnable personal CRM. Your contacts, always in your orbit.",
+  "author": "Nrame",
+  "license": "MIT",
+  "bin": {
+    "orbit-crm": "./bin/orbit.js"
+  },
+  "files": [
+    "bin/",
+    "public/",
+    "src/",
+    "Install Orbit.bat",
+    "Launch Orbit.bat",
+    "install-orbit.sh",
+    "launch-orbit.sh",
+    "next.config.js",
+    "tsconfig.json",
+    "tailwind.config.ts",
+    "postcss.config.js"
+  ],
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "orbit": "node bin/orbit.js"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.51.0",
+    "better-sqlite3": "^11.0.0",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
+    "dotenv": "^16.4.0",
+    "drizzle-orm": "^0.33.0",
+    "googleapis": "^140.0.0",
+    "lucide-react": "^0.427.0",
+    "next": "^14.2.5",
+    "node-cron": "^3.0.3",
+    "open": "^10.1.0",
+    "openai": "^4.55.0",
+    "p-limit": "^7.3.0",
+    "prompts": "^2.4.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/node": "^22.0.0",
+    "@types/node-cron": "^3.0.11",
+    "@types/prompts": "^2.4.9",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.19",
+    "drizzle-kit": "^0.24.0",
+    "postcss": "^8.4.40",
+    "tailwindcss": "^3.4.7",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

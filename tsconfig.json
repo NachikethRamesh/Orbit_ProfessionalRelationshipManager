@@ -1,0 +1,38 @@
+{
+  /* TypeScript configuration for the Next.js Personal CRM app.
+     Uses strict mode for maximum type safety and a path alias
+     so imports can use "@/..." instead of relative paths. */
+  "compilerOptions": {
+    /* Language and module settings */
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+
+    /* Strict type-checking */
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+
+    /* Allow JavaScript files (Next.js config files are .js) */
+    "allowJs": true,
+
+    /* Incremental compilation for faster rebuilds */
+    "incremental": true,
+
+    /* Next.js plugin for enhanced type checking */
+    "plugins": [{ "name": "next" }],
+
+    /* Path alias: "@/*" maps to "./src/*" so imports stay clean */
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
