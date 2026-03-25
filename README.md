@@ -24,26 +24,22 @@ That's it. `Install Orbit.bat` only needs to run once. After that, just use `Lau
 
 ## Quick Install (macOS)
 
-> **Just two double-clicks. No terminal needed.**
+> **Requires [Node.js](https://nodejs.org/) (LTS).** Install it via the official installer or with Homebrew: `brew install node`
 
-1. **[Download this repo](https://github.com/NachikethRamesh/Orbit_ProfessionalRelationshipManager/archive/refs/heads/main.zip)** and unzip it (or `git clone`)
-2. **Double-click `Install Orbit.command`** — Terminal opens, installs dependencies, runs setup, and builds the app
-3. **Double-click `Launch Orbit.command`** — starts Orbit and opens it in your browser
+1. **[Download this repo](https://github.com/NachikethRamesh/Orbit_ProfessionalRelationshipManager/archive/refs/heads/main.zip)** and unzip it
+2. **Open Terminal** in the unzipped folder (right-click the folder in Finder → *New Terminal at Folder*)
+3. **Install dependencies and run setup:**
+   ```
+   npm install
+   node bin/setup-only.js
+   npm run build
+   ```
+4. **Launch Orbit:**
+   ```
+   node bin/orbit.js
+   ```
 
-That's it. `Install Orbit.command` only needs to run once. After that, just use `Launch Orbit.command` whenever you want to open Orbit.
-
-> **No Node.js required.** The installer will automatically download a portable copy if you don't already have it.
-
----
-
-## Alternative: Command Line (any OS)
-
-```
-git clone https://github.com/NachikethRamesh/Orbit_ProfessionalRelationshipManager.git
-cd Orbit_ProfessionalRelationshipManager
-npm install
-node bin/orbit.js
-```
+That's it. Steps 1–3 only need to run once. After that, just open Terminal in the folder and run `node bin/orbit.js` to start Orbit.
 
 ---
 
