@@ -1,5 +1,7 @@
 # Orbit — Professional Relationship Manager
 
+https://orbit-professional-relationship-man.vercel.app/
+
 A professional relationship manager that runs entirely on your computer. It connects to your Gmail and Google Calendar to automatically track your relationships, uses AI to summarize conversations and suggest follow-ups, and shows you which contacts are going cold.
 
 **Your data never leaves your machine.** Everything is stored locally — no cloud accounts, no subscriptions.
