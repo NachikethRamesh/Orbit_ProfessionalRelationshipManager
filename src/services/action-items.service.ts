@@ -60,7 +60,7 @@ export async function generateActionItems(
    * System prompt: defines the AI's role, the output schema, and the rules
    * for when (and when not) to suggest actions.
    */
-  const systemPrompt = `You are a proactive personal PRM assistant. Your job is to analyze a user's recent interactions with a contact and suggest 0-3 actionable next steps.
+  const systemPrompt = `You are a proactive PRM assistant. Your job is to analyze a user's recent interactions with a contact and suggest 0-3 actionable next steps.
 
 Return a JSON array of action items. Each item must have this exact structure:
 {

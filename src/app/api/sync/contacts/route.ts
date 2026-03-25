@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
         try {
           return await syncGmail(user!.id, account.id);
         } catch (err) {
-          console.error(`[build-crm] Gmail sync failed for ${account.account_email}:`, err);
+          console.error(`[build-prm] Gmail sync failed for ${account.account_email}:`, err);
           return null;
         }
       })
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
     try {
       await generateAutoReminders(user!.id);
     } catch (err) {
-      console.error("[build-crm] Auto-reminders failed:", err);
+      console.error("[build-prm] Auto-reminders failed:", err);
     }
 
     /* Build summary message */

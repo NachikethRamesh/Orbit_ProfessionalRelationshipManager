@@ -12,7 +12,7 @@ import { getOpenAI } from "@/lib/openai";
  * Generates a 1-2 sentence AI summary of an interaction.
  *
  * Prompt design:
- *  - The system prompt positions the AI as a personal PRM assistant whose
+ *  - The system prompt positions the AI as a PRM assistant whose
  *    job is to create short, actionable summaries.
  *  - We instruct it to focus on: decisions made, commitments given,
  *    next steps agreed upon, and overall sentiment (positive/neutral/negative).
@@ -45,7 +45,7 @@ export async function summarizeInteraction({
    * We explicitly ask for decisions, commitments, next steps, and sentiment
    * because these are the most valuable signals for a PRM user.
    */
-  const systemPrompt = `You are a personal PRM assistant. Your job is to summarize interactions (emails and meetings) in 1-2 concise sentences.
+  const systemPrompt = `You are a PRM assistant. Your job is to summarize interactions (emails and meetings) in 1-2 concise sentences.
 
 Focus on:
 - Key decisions or outcomes

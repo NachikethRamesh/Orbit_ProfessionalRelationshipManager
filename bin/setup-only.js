@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Orbit Personal PRM — Setup-Only Script
+ * Orbit PRM — Setup-Only Script
  *
  * Runs first-time setup (interactive prompts + DB init) then exits.
  * Called by Install Orbit.bat before the Next.js build so that
@@ -85,7 +85,7 @@ async function runSetup() {
   }
 
   const envContent = [
-    "# Orbit Personal PRM Configuration",
+    "# Orbit PRM Configuration",
     `# Generated on ${new Date().toISOString()}`,
     "",
     "# User",

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
 /**
- * Orbit Personal PRM — CLI Entry Point
+ * Orbit PRM — CLI Entry Point
  *
  * Usage:
- *   npx orbit-personal-crm    (after npm install -g orbit-personal-crm)
- *   orbit-crm                  (global install)
+ *   npx orbit-prm    (after npm install -g orbit-prm)
+ *   orbit-prm         (global install)
  *
  * Flow:
  *   1. Check ~/.orbit/.env → first-run setup if missing
@@ -76,7 +76,7 @@ async function runSetup() {
   ]);
 
   if (!response.name || !response.email || !response.openaiKey) {
-    console.log("\n  Setup cancelled. Run orbit-crm again to retry.\n");
+    console.log("\n  Setup cancelled. Run orbit-prm again to retry.\n");
     process.exit(1);
   }
 
@@ -87,7 +87,7 @@ async function runSetup() {
   }
 
   const envContent = [
-    "# Orbit Personal PRM Configuration",
+    "# Orbit PRM Configuration",
     `# Generated on ${new Date().toISOString()}`,
     "",
     "# User",
