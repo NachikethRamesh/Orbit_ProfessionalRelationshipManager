@@ -18,32 +18,21 @@ Built by [Nachiketh Ramesh](https://nachikethramesh.com)
 
 That's it. `Install Orbit.bat` only needs to run once. After that, just use `Launch Orbit.bat` whenever you want to open Orbit.
 
+> **No Node.js required.** The installer will automatically download a portable copy if you don't already have it.
+
 ---
 
-## Quick Install (macOS / Linux)
+## Quick Install (macOS)
 
-Open **Terminal** and run:
+> **Just two double-clicks. No terminal needed.**
 
-```bash
-git clone https://github.com/NachikethRamesh/Orbit_ProfessionalRelationshipManager.git
-cd Orbit_ProfessionalRelationshipManager
-chmod +x install-orbit.sh launch-orbit.sh
-./install-orbit.sh
-```
+1. **[Download this repo](https://github.com/NachikethRamesh/Orbit_ProfessionalRelationshipManager/archive/refs/heads/main.zip)** and unzip it (or `git clone`)
+2. **Double-click `Install Orbit.command`** — Terminal opens, installs dependencies, runs setup, and builds the app
+3. **Double-click `Launch Orbit.command`** — starts Orbit and opens it in your browser
 
-Then to launch Orbit anytime:
+That's it. `Install Orbit.command` only needs to run once. After that, just use `Launch Orbit.command` whenever you want to open Orbit.
 
-```bash
-./launch-orbit.sh
-```
-
-> **Want to double-click instead of using Terminal?** By default, macOS opens `.sh` files in Xcode as text. To fix this:
-> 1. Right-click `install-orbit.sh` in Finder
-> 2. Click **Get Info**
-> 3. Under **Open with**, change from Xcode to **Terminal.app**
-> 4. Click **Change All** to apply to all `.sh` files
->
-> After that, double-clicking any `.sh` file will run it in Terminal — same as `.bat` on Windows.
+> **No Node.js required.** The installer will automatically download a portable copy if you don't already have it.
 
 ---
 
@@ -81,7 +70,6 @@ After that, Orbit opens at `http://localhost:3000` and you're good to go.
 
 ## What You'll Need
 
-- **Node.js** (version 18 or newer) — [download here](https://nodejs.org)
 - **An OpenAI API key** — for the AI features ([get one here](https://platform.openai.com/api-keys))
 - **A Google Cloud project** — so Orbit can read your Gmail and Calendar (free, setup guide below)
 
