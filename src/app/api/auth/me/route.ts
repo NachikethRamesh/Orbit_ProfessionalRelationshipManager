@@ -11,6 +11,8 @@ import { getDb } from '@/lib/db';
 import { users, connectedAccounts } from '@/lib/db/schema';
 import { eq, asc } from 'drizzle-orm';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const { user, error } = await getAuthUser(req);

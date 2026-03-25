@@ -68,6 +68,12 @@ export default function AppLayout({
               <MessageCircle className="w-[18px] h-[18px]" strokeWidth={2} />
               <span>Chat</span>
             </button>
+            <p className="px-3 text-[9px] leading-tight text-white/15">
+              Open-source, locally-runnable. Your data stays on your machine. Built by{" "}
+              <a href="https://nachikethramesh.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/30 transition-colors">
+                Nachiketh Ramesh
+              </a>
+            </p>
           </div>
         </div>
       </nav>
