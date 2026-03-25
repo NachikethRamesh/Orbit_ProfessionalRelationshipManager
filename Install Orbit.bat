@@ -1,4 +1,5 @@
 @echo off
+setlocal EnableDelayedExpansion
 title Orbit CRM - Installer
 color 0F
 
@@ -16,13 +17,28 @@ cd /d "%~dp0"
 :: 1. Check system PATH
 where node >nul 2>nul
 if %errorlevel% equ 0 (
-    for /f "tokens=*" %%i in ('node -v') do set NODE_VER=%%i
-    echo   Found Node.js !NODE_VER! on your system.
-    set "NODE=node"
-    set "NPM=npm"
-    goto :node_ready
+    :: Resolve the full path to the system node so we can find npm beside it
+    for /f "tokens=*" %%i in ('where node') do (
+        set "SYS_NODE=%%i"
+        goto :found_system_node
+    )
 )
+goto :check_portable
 
+:found_system_node
+for /f "tokens=*" %%i in ('node -v') do set "NODE_VER=%%i"
+echo   Found Node.js !NODE_VER! on your system.
+set "NODE=node"
+:: Use the npm that lives next to the system node executable (avoids local shims)
+for %%F in ("!SYS_NODE!") do set "NODE_DIR=%%~dpF"
+if exist "!NODE_DIR!npm.cmd" (
+    set "NPM=!NODE_DIR!npm.cmd"
+) else (
+    set "NPM=npm"
+)
+goto :node_ready
+
+:check_portable
 :: 2. Check portable install
 if exist ".\runtime\node\node.exe" (
     echo   Found portable Node.js in runtime folder.
