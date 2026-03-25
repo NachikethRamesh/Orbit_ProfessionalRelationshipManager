@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Orbit Personal CRM — CLI Entry Point
+ * Orbit Personal PRM — CLI Entry Point
  *
  * Usage:
  *   npx orbit-personal-crm    (after npm install -g orbit-personal-crm)
@@ -33,7 +33,7 @@ async function runSetup() {
   /* prompts is a dependency of the package */
   const prompts = require("prompts");
 
-  console.log("\n  Welcome to Orbit — Your Personal CRM\n");
+  console.log("\n  Welcome to Orbit — Professional Relationship Manager\n");
   console.log("  Let's get you set up. This will only take a minute.\n");
 
   const response = await prompts([
@@ -87,7 +87,7 @@ async function runSetup() {
   }
 
   const envContent = [
-    "# Orbit Personal CRM Configuration",
+    "# Orbit Personal PRM Configuration",
     `# Generated on ${new Date().toISOString()}`,
     "",
     "# User",
@@ -269,7 +269,7 @@ function insertLocalUser(name, email) {
 /* ── Main ── */
 
 async function main() {
-  console.log("\n  \u2604\uFE0F  Orbit — Your Personal CRM\n");
+  console.log("\n  \u2604\uFE0F  Orbit — Professional Relationship Manager\n");
 
   /* Step 1: First-run setup */
   if (!fs.existsSync(ENV_PATH)) {

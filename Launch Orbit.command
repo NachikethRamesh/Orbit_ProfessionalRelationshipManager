@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Orbit CRM — Launcher (macOS)
+# Orbit PRM — Launcher (macOS)
 #
 # Double-click this file to start Orbit.
 #

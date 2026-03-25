@@ -18,7 +18,7 @@ import { handleGoogleCallback } from '@/services/auth.service';
 
 export const dynamic = 'force-dynamic';
 
-/* The scopes we require for the CRM to function */
+/* The scopes we require for Orbit to function */
 const REQUIRED_SCOPES = [
   "https://www.googleapis.com/auth/gmail.readonly",
   "https://www.googleapis.com/auth/calendar.readonly",

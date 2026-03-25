@@ -138,19 +138,15 @@ export async function PATCH(req: NextRequest) {
 
   fs.writeFileSync(ENV_PATH, newLines.join("\n"), "utf-8");
 
-  /* Also update process.env so changes take effect without restart */
-  for (const [key, value] of Object.entries(updates)) {
-    if (EDITABLE_KEYS.includes(key as any)) {
-      process.env[key] = value;
-    }
-  }
-
-  /* Return masked values */
+  /* Reload the entire env file into process.env so ALL keys take effect instantly */
   const env = parseEnvFile();
+  for (const [key, value] of Object.entries(env)) {
+    process.env[key] = value;
+  }
   const settings: Record<string, string> = {};
   for (const k of EDITABLE_KEYS) {
     settings[k] = env[k] ? maskValue(env[k]) : "";
   }
 
-  return NextResponse.json({ settings, message: "Settings updated. Some changes may require a restart." });
+  return NextResponse.json({ settings, message: "Settings updated." });
 }

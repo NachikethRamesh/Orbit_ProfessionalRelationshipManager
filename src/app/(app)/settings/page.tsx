@@ -235,7 +235,7 @@ export default function SettingsPage() {
         <section>
           <h2 className="text-sm font-medium text-white/60 uppercase tracking-wider mb-3">About</h2>
           <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
-            <p className="text-white/50 text-sm">Orbit Personal CRM v1.0.0</p>
+            <p className="text-white/50 text-sm">Orbit PRM v1.0.0</p>
             <p className="text-white/30 text-xs mt-1">
               Open-source, locally-runnable. Your data stays on your machine. Built by{" "}
               <a

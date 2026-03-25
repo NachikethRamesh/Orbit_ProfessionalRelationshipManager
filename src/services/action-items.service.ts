@@ -1,9 +1,9 @@
 /**
- * Action Items Service — AI-Generated CRM Suggestions (Server-only)
+ * Action Items Service — AI-Generated PRM Suggestions (Server-only)
  *
  * Uses OpenAI's gpt-4o to analyze recent interactions with a contact
  * and generate 0-3 actionable suggestions (follow-ups, thank-yous,
- * check-ins, etc.). These become the "nudges" that make the CRM proactive.
+ * check-ins, etc.). These become the "nudges" that make the PRM proactive.
  */
 
 import { getOpenAI } from "@/lib/openai";
@@ -28,7 +28,7 @@ interface ActionItem {
  * Generates 0-3 actionable suggestions for a contact based on recent interactions.
  *
  * Prompt design:
- *  - The system prompt establishes the AI as a proactive CRM assistant and
+ *  - The system prompt establishes the AI as a proactive PRM assistant and
  *    defines the exact JSON schema it must return. By specifying the schema
  *    in the prompt, we get structured output without needing function calling.
  *  - We provide the contact's name, company, and title for personalization.
@@ -60,7 +60,7 @@ export async function generateActionItems(
    * System prompt: defines the AI's role, the output schema, and the rules
    * for when (and when not) to suggest actions.
    */
-  const systemPrompt = `You are a proactive personal CRM assistant. Your job is to analyze a user's recent interactions with a contact and suggest 0-3 actionable next steps.
+  const systemPrompt = `You are a proactive personal PRM assistant. Your job is to analyze a user's recent interactions with a contact and suggest 0-3 actionable next steps.
 
 Return a JSON array of action items. Each item must have this exact structure:
 {

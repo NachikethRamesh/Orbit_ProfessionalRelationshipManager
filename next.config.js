@@ -1,7 +1,14 @@
+const path = require("path");
+const os = require("os");
+
+/* Load ~/.orbit/.env so all server-side code can read the config */
+const orbitEnv = path.join(os.homedir(), ".orbit", ".env");
+try { require("dotenv").config({ path: orbitEnv }); } catch {}
+
 /**
  * Next.js Configuration
  *
- * This CRM app is fully dynamic (every page requires auth),
+ * This app is fully dynamic (every page requires auth),
  * so we disable static page generation at build time.
  *
  * @type {import('next').NextConfig}

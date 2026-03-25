@@ -1,7 +1,7 @@
 /**
  * Full Sync & Analyze Route — POST /api/sync/analyze
  *
- * Runs the complete CRM intelligence pipeline for the authenticated user:
+ * Runs the complete PRM intelligence pipeline for the authenticated user:
  *
  *  1. Sync Gmail (fetch new emails into interactions)
  *  2. Sync Calendar (fetch new events into interactions)
@@ -14,7 +14,7 @@
  * detailed results from each step.
  *
  * This is the main "refresh" action that the user triggers from the
- * dashboard to bring their CRM up to date.
+ * dashboard to bring their PRM up to date.
  */
 
 import { NextRequest, NextResponse } from 'next/server';

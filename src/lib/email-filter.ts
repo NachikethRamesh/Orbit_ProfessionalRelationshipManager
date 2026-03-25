@@ -1,7 +1,7 @@
 /**
  * Email Filter — filters out non-individual email addresses.
  *
- * Used during Build CRM (contact import) and Gmail sync to exclude
+ * Used during Build PRM (contact import) and Gmail sync to exclude
  * clearly automated, marketing, and system email addresses.
  *
  * IMPORTANT: This filter is intentionally conservative (minimal false positives).

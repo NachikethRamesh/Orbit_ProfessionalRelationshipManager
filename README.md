@@ -1,6 +1,6 @@
-# Orbit — Personal CRM
+# Orbit — Professional Relationship Manager
 
-A personal CRM that runs entirely on your computer. It connects to your Gmail and Google Calendar to automatically track your relationships, uses AI to summarize conversations and suggest follow-ups, and shows you which contacts are going cold.
+A professional relationship manager that runs entirely on your computer. It connects to your Gmail and Google Calendar to automatically track your relationships, uses AI to summarize conversations and suggest follow-ups, and shows you which contacts are going cold.
 
 **Your data never leaves your machine.** Everything is stored locally — no cloud accounts, no subscriptions.
 
@@ -78,7 +78,7 @@ After that, Orbit opens at `http://localhost:3000` and you're good to go.
 Orbit needs permission to read your Gmail and Calendar. Here's how to set that up:
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/) and sign in
-2. Click **Select a project** at the top, then **New Project** — give it any name (e.g. "Orbit CRM")
+2. Click **Select a project** at the top, then **New Project** — give it any name (e.g. "Orbit PRM")
 3. Once the project is created, go to **APIs & Services > Library** and enable these three:
    - **Gmail API**
    - **Google Calendar API**

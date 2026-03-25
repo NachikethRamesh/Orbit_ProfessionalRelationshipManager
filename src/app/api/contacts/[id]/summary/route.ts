@@ -75,7 +75,7 @@ export async function GET(
       return `[${date}] ${type}: ${summary}`;
     });
 
-    const prompt = `You are a CRM assistant. Summarize the relationship and key conversations with this contact in 2-3 sentences. Be succinct and focus on what matters: topics discussed, decisions made, and current status of the relationship.
+    const prompt = `You are a PRM assistant. Summarize the relationship and key conversations with this contact in 2-3 sentences. Be succinct and focus on what matters: topics discussed, decisions made, and current status of the relationship.
 
 Contact: ${contact.name} (${contact.email}${contact.company ? `, ${contact.company}` : ""})
 

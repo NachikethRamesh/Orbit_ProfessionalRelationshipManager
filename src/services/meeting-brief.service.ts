@@ -46,7 +46,7 @@ export async function generateMeetingBrief(
    * System prompt: instructs the AI to produce a structured markdown brief.
    * Each section heading is defined so the output is consistent and parseable.
    */
-  const systemPrompt = `You are a personal CRM assistant preparing a meeting brief. Generate a concise, actionable brief in markdown format with these four sections:
+  const systemPrompt = `You are a personal PRM assistant preparing a meeting brief. Generate a concise, actionable brief in markdown format with these four sections:
 
 ## Who They Are
 A brief profile of the contact — their role, company, and any notable background info. Use enrichment data if available.

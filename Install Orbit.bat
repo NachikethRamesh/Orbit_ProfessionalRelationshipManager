@@ -1,11 +1,11 @@
 @echo off
 setlocal EnableDelayedExpansion
-title Orbit CRM - Installer
+title Orbit PRM - Installer
 color 0F
 
 echo.
 echo   ==============================
-echo     Orbit CRM - Installation
+echo     Orbit PRM - Installation
 echo   ==============================
 echo.
 
@@ -140,7 +140,7 @@ if %errorlevel% neq 0 (
 :: Create the launcher with portable node support
 (
 echo @echo off
-echo title Orbit CRM
+echo title Orbit PRM
 echo cd /d "%%~dp0"
 echo if exist ".\runtime\node\node.exe" ^(
 echo     "%%~dp0runtime\node\node.exe" bin/orbit.js

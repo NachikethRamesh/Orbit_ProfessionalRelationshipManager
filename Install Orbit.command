@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Orbit CRM — Installer (macOS)
+# Orbit PRM — Installer (macOS)
 #
 # Double-click this file to install Orbit.
 #
@@ -9,7 +9,7 @@ set -e
 
 echo ""
 echo "  =============================="
-echo "    Orbit CRM — Installation"
+echo "    Orbit PRM — Installation"
 echo "  =============================="
 echo ""
 

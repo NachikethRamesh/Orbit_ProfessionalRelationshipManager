@@ -1,5 +1,5 @@
 {
-  /* TypeScript configuration for the Next.js Personal CRM app.
+  /* TypeScript configuration for the Next.js Orbit PRM app.
      Uses strict mode for maximum type safety and a path alias
      so imports can use "@/..." instead of relative paths. */
   "compilerOptions": {

@@ -8,7 +8,7 @@ import {
   useDeleteContact,
   useDeleteAllContacts,
   useBulkDeleteContacts,
-  useBuildCRM,
+  useBuildPRM,
   useSyncEmail,
   useEnrichContact,
   useAddTag,
@@ -116,7 +116,7 @@ export default function ContactsPage() {
   const deleteContact = useDeleteContact();
   const deleteAllContacts = useDeleteAllContacts();
   const bulkDeleteContacts = useBulkDeleteContacts();
-  const buildCRM = useBuildCRM();
+  const buildPRM = useBuildPRM();
   const syncEmail = useSyncEmail();
   const enrichContact = useEnrichContact();
 
@@ -189,13 +189,13 @@ export default function ContactsPage() {
               <Plus className="w-3 h-3" />
               Add Contact
             </button>
-            {/* Build CRM → then Sync */}
+            {/* Build PRM → then Sync */}
             <button
               onClick={async () => {
                 setBuildResult(null);
                 setSyncResult(null);
                 try {
-                  const r = await buildCRM.mutateAsync();
+                  const r = await buildPRM.mutateAsync();
                   setBuildResult(r.message);
                   /* After build completes and table reloads, run sync */
                   try {
@@ -208,12 +208,12 @@ export default function ContactsPage() {
                   setBuildResult(e instanceof Error ? e.message : "Failed");
                 }
               }}
-              disabled={buildCRM.isPending || syncEmail.isPending}
+              disabled={buildPRM.isPending || syncEmail.isPending}
               className={PILL_BTN}
               style={PILL_SHADOW}
             >
-              {(buildCRM.isPending || syncEmail.isPending) && <RefreshCw className="w-3 h-3 text-green-500 animate-spin shrink-0" />}
-              {buildCRM.isPending ? "Building CRM" : syncEmail.isPending ? "Syncing" : "Build CRM"}
+              {(buildPRM.isPending || syncEmail.isPending) && <RefreshCw className="w-3 h-3 text-green-500 animate-spin shrink-0" />}
+              {buildPRM.isPending ? "Building PRM" : syncEmail.isPending ? "Syncing" : "Build PRM"}
             </button>
             {/* Sync */}
             <button

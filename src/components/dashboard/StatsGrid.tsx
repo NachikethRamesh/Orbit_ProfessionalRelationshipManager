@@ -3,7 +3,7 @@
 /**
  * StatsGrid — Three-card summary strip for the dashboard.
  *
- * Displays key CRM metrics at a glance:
+ * Displays key PRM metrics at a glance:
  *   1. Total Contacts  (Users icon)
  *   2. Pending Suggestions  (Lightbulb icon)
  *   3. Upcoming Meetings  (Calendar icon)
@@ -14,7 +14,7 @@
 import { Users, Lightbulb, Calendar } from "lucide-react";
 
 interface StatsGridProps {
-  /** Total number of contacts in the user's CRM */
+  /** Total number of contacts in the user's PRM */
   totalContacts: number;
   /** Number of AI suggestions awaiting user action */
   pendingSuggestions: number;

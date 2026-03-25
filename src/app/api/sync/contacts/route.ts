@@ -1,8 +1,8 @@
 /**
- * Build CRM Route — POST /api/sync/contacts
+ * Build PRM Route — POST /api/sync/contacts
  *
- * Full CRM build pipeline:
- *  1. Import Google Contacts into CRM (deduped, grouped, company email prioritized)
+ * Full PRM build pipeline:
+ *  1. Import Google Contacts into PRM (deduped, grouped, company email prioritized)
  *  2. Sync Gmail interactions for all connected accounts
  *  3. Enrich all new contacts via Exa + AI search
  */
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("[POST /api/sync/contacts] Error:", err);
     return NextResponse.json(
-      { error: "Failed to build CRM" },
+      { error: "Failed to build PRM" },
       { status: 500 }
     );
   }

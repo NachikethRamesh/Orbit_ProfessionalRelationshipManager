@@ -265,7 +265,7 @@ export default function ChatModal({ onClose }: { onClose: () => void }) {
               </div>
               <div>
                 <span className="text-[13px] font-medium text-white/90">Orbit Assistant</span>
-                <p className="text-[10px] text-white/30">CRM AI Assistant</p>
+                <p className="text-[10px] text-white/30">PRM AI Assistant</p>
               </div>
             </div>
             <button

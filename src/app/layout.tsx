@@ -12,13 +12,13 @@ import { Providers } from "./providers";
 
 /**
  * Force dynamic rendering for all pages.
- * This CRM app requires authentication — no page can be statically generated.
+ * This app requires authentication — no page can be statically generated.
  */
 export const dynamic = "force-dynamic";
 
 /** Site-wide metadata used by Next.js for <head> tags and SEO */
 export const metadata: Metadata = {
-  title: "Personal CRM",
+  title: "Orbit PRM",
   description: "Relationship intelligence for founders",
 };
 

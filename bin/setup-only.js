@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Orbit Personal CRM — Setup-Only Script
+ * Orbit Personal PRM — Setup-Only Script
  *
  * Runs first-time setup (interactive prompts + DB init) then exits.
  * Called by Install Orbit.bat before the Next.js build so that
@@ -31,7 +31,7 @@ if (fs.existsSync(ENV_PATH)) {
 async function runSetup() {
   const prompts = require("prompts");
 
-  console.log("\n  Welcome to Orbit — Your Personal CRM\n");
+  console.log("\n  Welcome to Orbit — Professional Relationship Manager\n");
   console.log("  Let's get you set up. This will only take a minute.\n");
 
   const response = await prompts([
@@ -85,7 +85,7 @@ async function runSetup() {
   }
 
   const envContent = [
-    "# Orbit Personal CRM Configuration",
+    "# Orbit Personal PRM Configuration",
     `# Generated on ${new Date().toISOString()}`,
     "",
     "# User",

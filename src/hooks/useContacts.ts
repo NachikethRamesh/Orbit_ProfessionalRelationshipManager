@@ -162,12 +162,12 @@ export function useRemoveTag() {
 }
 
 /**
- * useBuildCRM — POST to import Google Contacts into the CRM.
+ * useBuildPRM — POST to import Google Contacts into the PRM.
  *
  * Calls /api/sync/contacts to pull people (not businesses) from all
  * connected Google accounts. Invalidates the contacts cache on success.
  */
-export function useBuildCRM() {
+export function useBuildPRM() {
   const queryClient = useQueryClient();
 
   return useMutation<

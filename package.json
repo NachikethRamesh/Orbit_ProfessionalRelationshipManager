@@ -1,7 +1,7 @@
 {
   "name": "orbit-personal-crm",
   "version": "1.0.0",
-  "description": "Orbit — A locally-runnable personal CRM. Your contacts, always in your orbit.",
+  "description": "Orbit PRM — A locally-runnable professional relationship manager. Your contacts, always in your orbit.",
   "author": "Nrame",
   "license": "MIT",
   "bin": {
