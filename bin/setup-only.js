@@ -3,9 +3,12 @@
 /**
  * Orbit PRM — Setup-Only Script
  *
- * Runs first-time setup (interactive prompts + DB init) then exits.
- * Called by Install Orbit.bat before the Next.js build so that
- * environment variables are in place for the build step.
+ * Creates ~/.orbit/.env (with auto-generated defaults) and initializes the
+ * database, then exits.  Called by Install Orbit.bat before the Next.js
+ * build so that the data directory is in place.
+ *
+ * API keys are NOT collected here — users enter them from the Settings
+ * page inside the app after launch.
  *
  * If ~/.orbit/.env already exists, exits immediately (already set up).
  */
@@ -27,221 +30,160 @@ if (fs.existsSync(ENV_PATH)) {
   process.exit(0);
 }
 
-/* ── Interactive setup ── */
-async function runSetup() {
-  const prompts = require("prompts");
+/* ── Create config & database ── */
 
-  console.log("\n  Welcome to Orbit — Professional Relationship Manager\n");
-  console.log("  Let's get you set up. This will only take a minute.\n");
-
-  const response = await prompts([
-    {
-      type: "text",
-      name: "name",
-      message: "Your name",
-      validate: (v) => v.trim().length > 0 || "Name is required",
-    },
-    {
-      type: "text",
-      name: "email",
-      message: "Your email",
-      validate: (v) => v.includes("@") || "Enter a valid email",
-    },
-    {
-      type: "password",
-      name: "openaiKey",
-      message: "OpenAI API key (required for AI features)",
-      validate: (v) => v.startsWith("sk-") || "Must start with sk-",
-    },
-    {
-      type: "text",
-      name: "googleClientId",
-      message: "Google OAuth Client ID (for Gmail/Calendar sync)",
-      validate: (v) => v.trim().length > 0 || "Required for sync",
-    },
-    {
-      type: "password",
-      name: "googleClientSecret",
-      message: "Google OAuth Client Secret",
-      validate: (v) => v.trim().length > 0 || "Required for sync",
-    },
-    {
-      type: "text",
-      name: "exaKey",
-      message: "Exa API Key (Optional - For Enrichment, press Enter to skip)",
-      initial: "",
-    },
-  ]);
-
-  if (!response.name || !response.email || !response.openaiKey) {
-    console.log("\n  Setup cancelled.\n");
-    process.exit(1);
-  }
-
-  const encryptionKey = crypto.randomBytes(32).toString("hex");
-
-  if (!fs.existsSync(ORBIT_DIR)) {
-    fs.mkdirSync(ORBIT_DIR, { recursive: true });
-  }
-
-  const envContent = [
-    "# Orbit PRM Configuration",
-    `# Generated on ${new Date().toISOString()}`,
-    "",
-    "# User",
-    `ORBIT_USER_NAME="${response.name}"`,
-    `ORBIT_USER_EMAIL="${response.email}"`,
-    "",
-    "# OpenAI (required)",
-    `OPENAI_API_KEY="${response.openaiKey}"`,
-    "",
-    "# Google OAuth (required for sync)",
-    `GOOGLE_CLIENT_ID="${response.googleClientId}"`,
-    `GOOGLE_CLIENT_SECRET="${response.googleClientSecret}"`,
-    `GOOGLE_REDIRECT_URI="http://localhost:${PORT}/api/auth/google/callback"`,
-    "",
-    "# Exa (optional)",
-    `EXA_API_KEY="${response.exaKey || ""}"`,
-    "",
-    "# Encryption (auto-generated)",
-    `ENCRYPTION_KEY="${encryptionKey}"`,
-    "",
-  ].join("\n");
-
-  fs.writeFileSync(ENV_PATH, envContent, "utf-8");
-  console.log(`\n  Config saved to ${ENV_PATH}`);
-
-  /* Create DB + tables + local user */
-  const Database = require("better-sqlite3");
-  if (!fs.existsSync(ORBIT_DIR)) {
-    fs.mkdirSync(ORBIT_DIR, { recursive: true });
-  }
-  const sqlite = new Database(DB_PATH);
-  sqlite.pragma("journal_mode = WAL");
-  sqlite.pragma("foreign_keys = ON");
-
-  sqlite.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-      id TEXT PRIMARY KEY,
-      email TEXT NOT NULL UNIQUE,
-      name TEXT,
-      created_at TEXT,
-      updated_at TEXT
-    );
-    CREATE TABLE IF NOT EXISTS connected_accounts (
-      id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      provider TEXT NOT NULL DEFAULT 'google',
-      account_email TEXT NOT NULL,
-      google_access_token TEXT,
-      google_refresh_token TEXT,
-      gmail_sync_cursor TEXT,
-      calendar_sync_cursor TEXT,
-      connected_at TEXT,
-      updated_at TEXT
-    );
-    CREATE UNIQUE INDEX IF NOT EXISTS uq_connected_accounts ON connected_accounts(user_id, provider, account_email);
-    CREATE TABLE IF NOT EXISTS contacts (
-      id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      email TEXT NOT NULL,
-      name TEXT,
-      company TEXT,
-      title TEXT,
-      linkedin_url TEXT,
-      twitter_url TEXT,
-      phone TEXT,
-      location TEXT,
-      other_emails TEXT DEFAULT '[]',
-      starred INTEGER DEFAULT 0,
-      warmth_score INTEGER DEFAULT 50,
-      exa_data TEXT,
-      created_at TEXT,
-      updated_at TEXT
-    );
-    CREATE UNIQUE INDEX IF NOT EXISTS uq_contacts_user_email ON contacts(user_id, email);
-    CREATE INDEX IF NOT EXISTS idx_contacts_user_id ON contacts(user_id);
-    CREATE INDEX IF NOT EXISTS idx_contacts_user_warmth ON contacts(user_id, warmth_score);
-    CREATE TABLE IF NOT EXISTS contact_tags (
-      id TEXT PRIMARY KEY,
-      contact_id TEXT NOT NULL REFERENCES contacts(id) ON DELETE CASCADE,
-      tag TEXT NOT NULL
-    );
-    CREATE UNIQUE INDEX IF NOT EXISTS uq_contact_tags ON contact_tags(contact_id, tag);
-    CREATE TABLE IF NOT EXISTS interactions (
-      id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      contact_id TEXT NOT NULL REFERENCES contacts(id) ON DELETE CASCADE,
-      type TEXT NOT NULL,
-      source_id TEXT,
-      subject TEXT,
-      snippet TEXT,
-      body_text TEXT,
-      ai_summary TEXT,
-      occurred_at TEXT NOT NULL,
-      created_at TEXT
-    );
-    CREATE UNIQUE INDEX IF NOT EXISTS uq_interactions_source ON interactions(user_id, source_id);
-    CREATE INDEX IF NOT EXISTS idx_interactions_contact ON interactions(contact_id);
-    CREATE INDEX IF NOT EXISTS idx_interactions_user_occurred ON interactions(user_id, occurred_at);
-    CREATE TABLE IF NOT EXISTS suggestions (
-      id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      contact_id TEXT NOT NULL REFERENCES contacts(id) ON DELETE CASCADE,
-      type TEXT NOT NULL,
-      title TEXT NOT NULL,
-      body TEXT,
-      priority INTEGER DEFAULT 0,
-      status TEXT DEFAULT 'pending',
-      created_at TEXT
-    );
-    CREATE INDEX IF NOT EXISTS idx_suggestions_user_status ON suggestions(user_id, status);
-    CREATE TABLE IF NOT EXISTS reminders (
-      id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      contact_id TEXT REFERENCES contacts(id) ON DELETE CASCADE,
-      suggestion_id TEXT REFERENCES suggestions(id) ON DELETE SET NULL,
-      title TEXT NOT NULL,
-      remind_at TEXT NOT NULL,
-      status TEXT DEFAULT 'pending',
-      created_at TEXT
-    );
-    CREATE INDEX IF NOT EXISTS idx_reminders_user_status ON reminders(user_id, status, remind_at);
-    CREATE TABLE IF NOT EXISTS deleted_contacts (
-      id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      email TEXT NOT NULL
-    );
-    CREATE UNIQUE INDEX IF NOT EXISTS uq_deleted_contacts ON deleted_contacts(user_id, email);
-    CREATE TABLE IF NOT EXISTS chat_sessions (
-      id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      title TEXT DEFAULT 'New Chat',
-      created_at TEXT,
-      updated_at TEXT
-    );
-    CREATE TABLE IF NOT EXISTS chat_messages (
-      id TEXT PRIMARY KEY,
-      session_id TEXT NOT NULL REFERENCES chat_sessions(id) ON DELETE CASCADE,
-      role TEXT NOT NULL,
-      content TEXT NOT NULL,
-      created_at TEXT
-    );
-  `);
-
-  const now = new Date().toISOString();
-  sqlite
-    .prepare(
-      "INSERT OR REPLACE INTO users (id, email, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)"
-    )
-    .run("local-user", response.email, response.name, now, now);
-  sqlite.close();
-
-  console.log("  Database initialized at ~/.orbit/orbit.db");
-  console.log("\n  Setup complete!\n");
+if (!fs.existsSync(ORBIT_DIR)) {
+  fs.mkdirSync(ORBIT_DIR, { recursive: true });
 }
 
-runSetup().catch((err) => {
-  console.error("  Setup error:", err.message || err);
-  process.exit(1);
-});
+const encryptionKey = crypto.randomBytes(32).toString("hex");
+
+const envContent = [
+  "# Orbit PRM Configuration",
+  `# Generated on ${new Date().toISOString()}`,
+  "",
+  "# OpenAI (required for AI features — add your key in Settings)",
+  'OPENAI_API_KEY=""',
+  "",
+  "# Google OAuth (required for sync — add in Settings)",
+  'GOOGLE_CLIENT_ID=""',
+  'GOOGLE_CLIENT_SECRET=""',
+  `GOOGLE_REDIRECT_URI="http://localhost:${PORT}/api/auth/google/callback"`,
+  "",
+  "# Exa (optional — for contact enrichment)",
+  'EXA_API_KEY=""',
+  "",
+  "# Encryption (auto-generated — do not change)",
+  `ENCRYPTION_KEY="${encryptionKey}"`,
+  "",
+].join("\n");
+
+fs.writeFileSync(ENV_PATH, envContent, "utf-8");
+console.log(`\n  Config created at ${ENV_PATH}`);
+
+/* ── Initialize database ── */
+
+const Database = require("better-sqlite3");
+const sqlite = new Database(DB_PATH);
+sqlite.pragma("journal_mode = WAL");
+sqlite.pragma("foreign_keys = ON");
+
+sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    email TEXT NOT NULL UNIQUE,
+    name TEXT,
+    created_at TEXT,
+    updated_at TEXT
+  );
+  CREATE TABLE IF NOT EXISTS connected_accounts (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    provider TEXT NOT NULL DEFAULT 'google',
+    account_email TEXT NOT NULL,
+    google_access_token TEXT,
+    google_refresh_token TEXT,
+    gmail_sync_cursor TEXT,
+    calendar_sync_cursor TEXT,
+    connected_at TEXT,
+    updated_at TEXT
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS uq_connected_accounts ON connected_accounts(user_id, provider, account_email);
+  CREATE TABLE IF NOT EXISTS contacts (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    email TEXT NOT NULL,
+    name TEXT,
+    company TEXT,
+    title TEXT,
+    linkedin_url TEXT,
+    twitter_url TEXT,
+    phone TEXT,
+    location TEXT,
+    other_emails TEXT DEFAULT '[]',
+    starred INTEGER DEFAULT 0,
+    warmth_score INTEGER DEFAULT 50,
+    exa_data TEXT,
+    created_at TEXT,
+    updated_at TEXT
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS uq_contacts_user_email ON contacts(user_id, email);
+  CREATE INDEX IF NOT EXISTS idx_contacts_user_id ON contacts(user_id);
+  CREATE INDEX IF NOT EXISTS idx_contacts_user_warmth ON contacts(user_id, warmth_score);
+  CREATE TABLE IF NOT EXISTS contact_tags (
+    id TEXT PRIMARY KEY,
+    contact_id TEXT NOT NULL REFERENCES contacts(id) ON DELETE CASCADE,
+    tag TEXT NOT NULL
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS uq_contact_tags ON contact_tags(contact_id, tag);
+  CREATE TABLE IF NOT EXISTS interactions (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    contact_id TEXT NOT NULL REFERENCES contacts(id) ON DELETE CASCADE,
+    type TEXT NOT NULL,
+    source_id TEXT,
+    subject TEXT,
+    snippet TEXT,
+    body_text TEXT,
+    ai_summary TEXT,
+    occurred_at TEXT NOT NULL,
+    created_at TEXT
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS uq_interactions_source ON interactions(user_id, source_id);
+  CREATE INDEX IF NOT EXISTS idx_interactions_contact ON interactions(contact_id);
+  CREATE INDEX IF NOT EXISTS idx_interactions_user_occurred ON interactions(user_id, occurred_at);
+  CREATE TABLE IF NOT EXISTS suggestions (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    contact_id TEXT NOT NULL REFERENCES contacts(id) ON DELETE CASCADE,
+    type TEXT NOT NULL,
+    title TEXT NOT NULL,
+    body TEXT,
+    priority INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'pending',
+    created_at TEXT
+  );
+  CREATE INDEX IF NOT EXISTS idx_suggestions_user_status ON suggestions(user_id, status);
+  CREATE TABLE IF NOT EXISTS reminders (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    contact_id TEXT REFERENCES contacts(id) ON DELETE CASCADE,
+    suggestion_id TEXT REFERENCES suggestions(id) ON DELETE SET NULL,
+    title TEXT NOT NULL,
+    remind_at TEXT NOT NULL,
+    status TEXT DEFAULT 'pending',
+    created_at TEXT
+  );
+  CREATE INDEX IF NOT EXISTS idx_reminders_user_status ON reminders(user_id, status, remind_at);
+  CREATE TABLE IF NOT EXISTS deleted_contacts (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    email TEXT NOT NULL
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS uq_deleted_contacts ON deleted_contacts(user_id, email);
+  CREATE TABLE IF NOT EXISTS chat_sessions (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title TEXT DEFAULT 'New Chat',
+    created_at TEXT,
+    updated_at TEXT
+  );
+  CREATE TABLE IF NOT EXISTS chat_messages (
+    id TEXT PRIMARY KEY,
+    session_id TEXT NOT NULL REFERENCES chat_sessions(id) ON DELETE CASCADE,
+    role TEXT NOT NULL,
+    content TEXT NOT NULL,
+    created_at TEXT
+  );
+`);
+
+const now = new Date().toISOString();
+sqlite
+  .prepare(
+    "INSERT OR IGNORE INTO users (id, email, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)"
+  )
+  .run("local-user", "user@orbit.local", "Orbit User", now, now);
+sqlite.close();
+
+console.log("  Database initialized at ~/.orbit/orbit.db");
+console.log("\n  Setup complete! Add your API keys in Settings after launching Orbit.\n");

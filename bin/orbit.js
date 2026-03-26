@@ -27,58 +27,11 @@ const DB_PATH = path.join(ORBIT_DIR, "orbit.db");
 const PROJECT_DIR = path.resolve(__dirname, "..");
 const PORT = process.env.PORT || 3000;
 
-/* ── First-run setup (pure JS, no tsx needed) ── */
+/* ── First-run setup (no interactive prompts — keys are entered in Settings) ── */
 
 async function runSetup() {
-  /* prompts is a dependency of the package */
-  const prompts = require("prompts");
-
   console.log("\n  Welcome to Orbit — Professional Relationship Manager\n");
-  console.log("  Let's get you set up. This will only take a minute.\n");
-
-  const response = await prompts([
-    {
-      type: "text",
-      name: "name",
-      message: "Your name",
-      validate: (v) => v.trim().length > 0 || "Name is required",
-    },
-    {
-      type: "text",
-      name: "email",
-      message: "Your email",
-      validate: (v) => v.includes("@") || "Enter a valid email",
-    },
-    {
-      type: "password",
-      name: "openaiKey",
-      message: "OpenAI API key (required for AI features)",
-      validate: (v) => v.startsWith("sk-") || "Must start with sk-",
-    },
-    {
-      type: "text",
-      name: "googleClientId",
-      message: "Google OAuth Client ID (for Gmail/Calendar sync)",
-      validate: (v) => v.trim().length > 0 || "Required for sync",
-    },
-    {
-      type: "password",
-      name: "googleClientSecret",
-      message: "Google OAuth Client Secret",
-      validate: (v) => v.trim().length > 0 || "Required for sync",
-    },
-    {
-      type: "text",
-      name: "exaKey",
-      message: "Exa API Key (Optional - For Enrichment, press Enter to skip)",
-      initial: "",
-    },
-  ]);
-
-  if (!response.name || !response.email || !response.openaiKey) {
-    console.log("\n  Setup cancelled. Run orbit-prm again to retry.\n");
-    process.exit(1);
-  }
+  console.log("  Setting up for the first time...\n");
 
   const encryptionKey = crypto.randomBytes(32).toString("hex");
 
@@ -90,35 +43,31 @@ async function runSetup() {
     "# Orbit PRM Configuration",
     `# Generated on ${new Date().toISOString()}`,
     "",
-    "# User",
-    `ORBIT_USER_NAME="${response.name}"`,
-    `ORBIT_USER_EMAIL="${response.email}"`,
+    "# OpenAI (required for AI features — add your key in Settings)",
+    'OPENAI_API_KEY=""',
     "",
-    "# OpenAI (required)",
-    `OPENAI_API_KEY="${response.openaiKey}"`,
-    "",
-    "# Google OAuth (required for sync)",
-    `GOOGLE_CLIENT_ID="${response.googleClientId}"`,
-    `GOOGLE_CLIENT_SECRET="${response.googleClientSecret}"`,
+    "# Google OAuth (required for sync — add in Settings)",
+    'GOOGLE_CLIENT_ID=""',
+    'GOOGLE_CLIENT_SECRET=""',
     `GOOGLE_REDIRECT_URI="http://localhost:${PORT}/api/auth/google/callback"`,
     "",
-    "# Exa (optional)",
-    `EXA_API_KEY="${response.exaKey || ""}"`,
+    "# Exa (optional — for contact enrichment)",
+    'EXA_API_KEY=""',
     "",
-    "# Encryption (auto-generated)",
+    "# Encryption (auto-generated — do not change)",
     `ENCRYPTION_KEY="${encryptionKey}"`,
     "",
   ].join("\n");
 
   fs.writeFileSync(ENV_PATH, envContent, "utf-8");
-  console.log(`\n  Config saved to ${ENV_PATH}`);
+  console.log(`  Config created at ${ENV_PATH}`);
 
   /* Create DB + tables + local user */
   runMigrations();
-  insertLocalUser(response.name, response.email);
+  insertLocalUser("Orbit User", "user@orbit.local");
 
   console.log("  Database initialized at ~/.orbit/orbit.db");
-  console.log("\n  Setup complete!\n");
+  console.log("\n  Setup complete! Add your API keys in Settings after Orbit opens.\n");
 }
 
 /* ── Database migrations (pure JS, no drizzle needed) ── */

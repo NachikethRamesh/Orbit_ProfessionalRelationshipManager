@@ -45,14 +45,13 @@ That's it. Steps 1–3 only need to run once. After that, just open Terminal in 
 
 ## First-Time Setup
 
-The first time Orbit launches, it will ask you for a few things:
+After installing and launching Orbit, open it in your browser at `http://localhost:3000` and go to **Settings** to add your API keys:
 
-1. Your name and email
-2. Your OpenAI API key ([get one here](https://platform.openai.com/api-keys))
-3. Your Google Client ID and Secret (see below)
-4. Optionally, an Exa API key for contact enrichment
+1. Your **OpenAI API key** ([get one here](https://platform.openai.com/api-keys))
+2. Your **Google Client ID** and **Client Secret** (see below)
+3. Optionally, an **Exa API key** for contact enrichment
 
-After that, Orbit opens at `http://localhost:3000` and you're good to go.
+That's it — save your keys and you're good to go.
 
 ## What It Does
 
@@ -83,13 +82,13 @@ Orbit needs permission to read your Gmail and Calendar. Here's how to set that u
 5. Click **Create Credentials > OAuth 2.0 Client ID**
    - Application type: **Web application**
    - Under "Authorized redirect URIs", add: `http://localhost:3000/api/auth/google/callback`
-6. Copy the **Client ID** and **Client Secret** — you'll paste these into the Orbit setup wizard
+6. Copy the **Client ID** and **Client Secret** — you'll paste these into the **Settings** page in Orbit
 
 That's it! Once connected, Orbit will pull in your contacts and start syncing.
 
-## Changing Settings Later
+## Settings Reference
 
-All your settings (API keys, etc.) can be changed from the **Settings** page inside Orbit, or by editing the file at `~/.orbit/.env` and restarting.
+All settings are managed from the **Settings** page inside Orbit. You can also edit `~/.orbit/.env` directly and restart.
 
 | Setting | Required? | What it's for |
 |---------|-----------|---------------|
