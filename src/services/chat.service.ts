@@ -83,11 +83,15 @@ async function buildSystemPrompt(userId: string): Promise<string> {
   const allContacts = db.select({
     id: contacts.id, name: contacts.name, email: contacts.email,
     company: contacts.company, title: contacts.title,
-    warmth_score: contacts.warmth_score, updated_at: contacts.updated_at,
+    linkedin_url: contacts.linkedin_url, twitter_url: contacts.twitter_url,
+    phone: contacts.phone, location: contacts.location,
+    other_emails: contacts.other_emails, starred: contacts.starred,
+    warmth_score: contacts.warmth_score, created_at: contacts.created_at,
+    updated_at: contacts.updated_at,
   }).from(contacts)
     .where(eq(contacts.user_id, userId))
     .orderBy(desc(contacts.warmth_score))
-    .limit(100).all();
+    .all();
 
   const pendingReminders = db.select({
     id: reminders.id, title: reminders.title, remind_at: reminders.remind_at,
@@ -115,7 +119,22 @@ async function buildSystemPrompt(userId: string): Promise<string> {
     .limit(15).all();
 
   const contactList = allContacts
-    .map((c) => `- ${c.name} (${c.email}) | ${c.company || "no company"} | ${c.title || "no title"} | warmth: ${c.warmth_score}`)
+    .map((c) => {
+      const parts = [`- ${c.name || "Unknown"} (${c.email})`];
+      if (c.company) parts.push(`company: ${c.company}`);
+      if (c.title) parts.push(`title: ${c.title}`);
+      parts.push(`warmth: ${c.warmth_score}`);
+      if (c.starred) parts.push("⭐ starred");
+      if (c.phone) parts.push(`phone: ${c.phone}`);
+      if (c.location) parts.push(`location: ${c.location}`);
+      if (c.linkedin_url) parts.push(`linkedin: ${c.linkedin_url}`);
+      if (c.twitter_url) parts.push(`twitter: ${c.twitter_url}`);
+      const otherEmails = Array.isArray(c.other_emails) && c.other_emails.length > 0
+        ? c.other_emails : null;
+      if (otherEmails) parts.push(`other emails: ${otherEmails.join(", ")}`);
+      if (c.created_at) parts.push(`added: ${c.created_at.slice(0, 10)}`);
+      return parts.join(" | ");
+    })
     .join("\n");
 
   const reminderList = pendingReminders
@@ -155,12 +174,18 @@ REFUSAL — If the user asks about anything NOT related to their contacts, relat
 
 CONVERSATION CONTEXT — You have access to the full conversation history. Always relate your answers to what was previously discussed.
 
-FORMATTING — Keep responses concise but thorough. Use bullet points for lists. Do not use markdown headers.
+FORMATTING — You MUST follow these rules for EVERY response:
+• Always respond using bullet points. Every piece of information must be a bullet point.
+• Keep each bullet concise — one idea per bullet.
+• Use a short introductory line before the bullets only when needed for context.
+• Do not use markdown headers (#, ##, etc.).
+• Do not write long paragraphs. If a response has more than one sentence, break it into bullets.
+• For follow-up suggestions or action items, prefix with an action verb (e.g., "Reach out to…", "Schedule a…", "Review…").
 
 PRM CONTEXT (live data):
 Total contacts: ${totalContacts} | Warm (≥70): ${warmContacts} | Cold (<30): ${coldContacts}
 
-Contacts (up to 100):
+Contacts (all):
 ${contactList || "No contacts yet."}
 
 Pending reminders:
