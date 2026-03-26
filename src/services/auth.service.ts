@@ -16,11 +16,17 @@ const SCOPES = [
 ];
 
 function createOAuth2Client() {
-  return new google.auth.OAuth2(
-    getEnv("GOOGLE_CLIENT_ID"),
-    getEnv("GOOGLE_CLIENT_SECRET"),
-    getEnv("GOOGLE_REDIRECT_URI"),
-  );
+  const clientId = getEnv("GOOGLE_CLIENT_ID");
+  const clientSecret = getEnv("GOOGLE_CLIENT_SECRET");
+  const redirectUri = getEnv("GOOGLE_REDIRECT_URI");
+
+  if (!clientId || !clientSecret) {
+    throw new Error(
+      "Google OAuth credentials not configured. Please add your GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in Settings."
+    );
+  }
+
+  return new google.auth.OAuth2(clientId, clientSecret, redirectUri);
 }
 
 export function getGoogleAuthUrl(userId: string): string {

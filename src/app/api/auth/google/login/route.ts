@@ -32,11 +32,13 @@ export async function GET(req: NextRequest) {
     const url = getGoogleAuthUrl(user!.id);
 
     return NextResponse.json({ url });
-  } catch (err) {
-    /* Catch unexpected errors and return a generic 500 response */
+  } catch (err: any) {
     console.error('[GET /api/auth/google/login] Error:', err);
+    const message = err?.message?.includes('not configured')
+      ? err.message
+      : 'Failed to generate Google auth URL';
     return NextResponse.json(
-      { error: 'Failed to generate Google auth URL' },
+      { error: message },
       { status: 500 }
     );
   }

@@ -25,10 +25,11 @@ export default function ConnectPage() {
   const [accounts, setAccounts] = useState<ConnectedAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [connectError, setConnectError] = useState<string | null>(null);
 
   const errorCode = searchParams.get("error");
   const connected = searchParams.get("connected");
-  const errorMessage = errorCode ? ERROR_MESSAGES[errorCode] ?? ERROR_MESSAGES.google_connect_failed : null;
+  const errorMessage = connectError || (errorCode ? ERROR_MESSAGES[errorCode] ?? ERROR_MESSAGES.google_connect_failed : null);
 
   const fetchAccounts = useCallback(async () => {
     try {
@@ -45,12 +46,14 @@ export default function ConnectPage() {
 
   const handleConnect = async (provider: string) => {
     setActionLoading(`connect-${provider}`);
+    setConnectError(null);
     try {
       if (provider === "google") {
         const res = await apiClient.get<{ url: string }>("/api/auth/google/login");
         window.location.href = res.url;
       }
-    } catch {
+    } catch (err) {
+      setConnectError(err instanceof Error ? err.message : "Failed to start Google connection.");
       setActionLoading(null);
     }
   };
