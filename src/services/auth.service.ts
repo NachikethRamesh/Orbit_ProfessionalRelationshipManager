@@ -4,6 +4,9 @@ import { connectedAccounts } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { encrypt, decrypt } from "@/lib/encryption";
 import crypto from "crypto";
+import fs from "fs";
+import path from "path";
+import os from "os";
 
 const SCOPES = [
   "https://www.googleapis.com/auth/gmail.readonly",
@@ -14,11 +17,43 @@ const SCOPES = [
   "https://www.googleapis.com/auth/userinfo.profile",
 ];
 
+/**
+ * Reads a key from process.env, falling back to the .env file directly
+ * if the value is empty (handles keys saved via Settings after server start).
+ */
+function getEnv(key: string): string {
+  const val = process.env[key];
+  if (val) return val;
+
+  // Fall back: read directly from ~/.orbit/.env
+  const envPath = path.join(os.homedir(), ".orbit", ".env");
+  try {
+    const content = fs.readFileSync(envPath, "utf-8");
+    for (const line of content.split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eqIndex = trimmed.indexOf("=");
+      if (eqIndex === -1) continue;
+      const k = trimmed.slice(0, eqIndex).trim();
+      if (k !== key) continue;
+      let v = trimmed.slice(eqIndex + 1).trim();
+      if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
+        v = v.slice(1, -1);
+      }
+      if (v) {
+        process.env[key] = v; // Cache for subsequent calls
+        return v;
+      }
+    }
+  } catch {}
+  return "";
+}
+
 function createOAuth2Client() {
   return new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID!,
-    process.env.GOOGLE_CLIENT_SECRET!,
-    process.env.GOOGLE_REDIRECT_URI!,
+    getEnv("GOOGLE_CLIENT_ID"),
+    getEnv("GOOGLE_CLIENT_SECRET"),
+    getEnv("GOOGLE_REDIRECT_URI"),
   );
 }
 
