@@ -25,7 +25,7 @@ const KEY_META: { key: keyof SettingsConfig; label: string; secret: boolean; pla
   {
     key: "GOOGLE_CLIENT_ID",
     label: "Google Client ID",
-    secret: false,
+    secret: true,
     placeholder: "123456789.apps.googleusercontent.com",
     help: "Create OAuth 2.0 credentials in Google Cloud Console > APIs & Services > Credentials. Choose \"Web application\" type.",
     helpUrl: "https://console.cloud.google.com/apis/credentials",
@@ -144,6 +144,11 @@ export default function SettingsPage() {
         {/* Configuration */}
         <section className="mb-8">
           <h2 className="text-sm font-medium text-white/60 uppercase tracking-wider mb-3">Configuration</h2>
+          {/* Hidden fields to absorb browser autofill */}
+          <div aria-hidden="true" style={{ position: "absolute", opacity: 0, height: 0, overflow: "hidden", pointerEvents: "none" }}>
+            <input type="text" name="fake-user" tabIndex={-1} />
+            <input type="password" name="fake-pass" tabIndex={-1} />
+          </div>
           <div className="flex flex-col gap-3">
             {KEY_META.map((meta) => {
               const value = getDisplayValue(meta.key, meta);
@@ -172,7 +177,7 @@ export default function SettingsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <input
-                      type={meta.secret && !revealed.has(meta.key) && !editing ? "password" : "text"}
+                      type="text"
                       value={value}
                       placeholder={meta.placeholder}
                       onChange={(e) => handleChange(meta.key, e.target.value)}
@@ -183,7 +188,10 @@ export default function SettingsPage() {
                           ? "text-white/40 cursor-not-allowed"
                           : "text-white/80 focus:border-orange-400/40"
                       }`}
-                      autoComplete="one-time-code"
+                      style={meta.secret && !revealed.has(meta.key) && !editing ? { WebkitTextSecurity: "disc", textSecurity: "disc" } as React.CSSProperties : undefined}
+                      autoComplete="off"
+                      data-lpignore="true"
+                      data-1p-ignore="true"
                       spellCheck={false}
                     />
                     {meta.secret && !meta.readOnly && (
