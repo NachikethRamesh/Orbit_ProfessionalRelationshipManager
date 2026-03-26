@@ -1,7 +1,5 @@
 # Orbit — Professional Relationship Manager
 
-https://orbit-professional-relationship-man.vercel.app/
-
 A professional relationship manager that runs entirely on your computer. It connects to your Gmail and Google Calendar to automatically track your relationships, uses AI to summarize conversations and suggest follow-ups, and shows you which contacts are going cold.
 
 **Your data never leaves your machine.** Everything is stored locally — no cloud accounts, no subscriptions.
@@ -20,13 +18,13 @@ Built by [Nachiketh Ramesh](https://nachikethramesh.com)
 
 That's it. `Install Orbit.bat` only needs to run once. After that, just use `Launch Orbit.bat` whenever you want to open Orbit.
 
-> **No Node.js required.** The installer will automatically download a portable copy if you don't already have it.
+> **No Node.js required.** The installer will automatically download a portable copy if you don't have it or if your installed version isn't compatible. Orbit supports Node.js 18, 20, or 22 (LTS versions only).
 
 ---
 
 ## Quick Install (macOS)
 
-> **Requires [Node.js](https://nodejs.org/) (LTS).** Install it via the official installer or with Homebrew: `brew install node`
+> **Requires [Node.js](https://nodejs.org/) 18, 20, or 22 (LTS).** Install it via the official installer or with Homebrew: `brew install node@22`
 
 1. **[Download this repo](https://github.com/NachikethRamesh/Orbit_ProfessionalRelationshipManager/archive/refs/heads/main.zip)** and unzip it
 2. **Open Terminal** in the unzipped folder (right-click the folder in Finder → *New Terminal at Folder*)

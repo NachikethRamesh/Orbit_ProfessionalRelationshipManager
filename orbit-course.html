@@ -1,0 +1,2151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Orbit Works — An Interactive Course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   DESIGN SYSTEM TOKENS
+   ═══════════════════════════════════════════════════════ */
+:root {
+  --color-bg:             #FAF7F2;
+  --color-bg-warm:        #F5F0E8;
+  --color-bg-code:        #1E1E2E;
+  --color-text:           #2C2A28;
+  --color-text-secondary: #6B6560;
+  --color-text-muted:     #9E9790;
+  --color-border:         #E5DFD6;
+  --color-border-light:   #EEEBE5;
+  --color-surface:        #FFFFFF;
+  --color-surface-warm:   #FDF9F3;
+
+  --color-accent:         #D94F30;
+  --color-accent-hover:   #C4432A;
+  --color-accent-light:   #FDEEE9;
+  --color-accent-muted:   #E8836C;
+
+  --color-success:        #2D8B55;
+  --color-success-light:  #E8F5EE;
+  --color-error:          #C93B3B;
+  --color-error-light:    #FDE8E8;
+  --color-info:           #2A7B9B;
+  --color-info-light:     #E4F2F7;
+
+  --color-actor-1:        #D94F30;
+  --color-actor-2:        #2A7B9B;
+  --color-actor-3:        #7B6DAA;
+  --color-actor-4:        #D4A843;
+  --color-actor-5:        #2D8B55;
+
+  --font-display:  'Bricolage Grotesque', Georgia, serif;
+  --font-body:     'DM Sans', -apple-system, sans-serif;
+  --font-mono:     'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+  --text-4xl:  2.25rem;
+  --text-5xl:  3rem;
+  --text-6xl:  3.75rem;
+
+  --leading-tight:  1.15;
+  --leading-snug:   1.3;
+  --leading-normal: 1.6;
+
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  --content-width:     800px;
+  --content-width-wide: 1000px;
+  --nav-height:        50px;
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  16px;
+  --radius-full: 9999px;
+
+  --shadow-sm:  0 1px 2px rgba(44, 42, 40, 0.05);
+  --shadow-md:  0 4px 12px rgba(44, 42, 40, 0.08);
+  --shadow-lg:  0 8px 24px rgba(44, 42, 40, 0.1);
+  --shadow-xl:  0 16px 48px rgba(44, 42, 40, 0.12);
+
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast:   150ms;
+  --duration-normal: 300ms;
+  --duration-slow:   500ms;
+  --stagger-delay:   120ms;
+}
+
+/* ═══════════════════════════════════════════════════════
+   GLOBAL RESETS & TYPOGRAPHY
+   ═══════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  scroll-snap-type: y proximity;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--color-text);
+  background: var(--color-bg);
+  background-image: radial-gradient(ellipse at 20% 50%, rgba(217,79,48,0.03) 0%, transparent 50%);
+}
+h1,h2,h3,h4 { font-family: var(--font-display); line-height: var(--leading-tight); }
+a { color: var(--color-accent); }
+pre, code {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: hidden;
+}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: var(--radius-full); }
+.translation-code::-webkit-scrollbar, pre::-webkit-scrollbar { display: none; }
+
+/* ═══════════════════════════════════════════════════════
+   NAVIGATION & PROGRESS
+   ═══════════════════════════════════════════════════════ */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--nav-height);
+  background: rgba(250, 247, 242, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 1000;
+  border-bottom: 1px solid var(--color-border-light);
+}
+.progress-bar {
+  position: absolute; bottom: 0; left: 0; height: 3px;
+  background: var(--color-accent);
+  width: 0%;
+  transition: width 150ms linear;
+}
+.nav-inner {
+  max-width: var(--content-width-wide);
+  margin: 0 auto;
+  height: 100%;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 var(--space-6);
+}
+.nav-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+.nav-dots { display: flex; gap: var(--space-3); }
+.nav-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 2px solid var(--color-text-muted);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--duration-fast);
+  position: relative;
+}
+.nav-dot:hover { border-color: var(--color-accent-muted); }
+.nav-dot.current { border-color: var(--color-accent); background: var(--color-accent-light); box-shadow: 0 0 8px rgba(217,79,48,0.25); }
+.nav-dot.visited { background: var(--color-accent); border-color: var(--color-accent); }
+.nav-dot-tip {
+  position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+  background: var(--color-bg-code); color: #CDD6F4;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs); font-family: var(--font-body);
+  white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--duration-fast);
+}
+.nav-dot:hover .nav-dot-tip { opacity: 1; }
+
+/* ═══════════════════════════════════════════════════════
+   MODULE LAYOUT
+   ═══════════════════════════════════════════════════════ */
+.module {
+  min-height: 100dvh;
+  min-height: 100vh;
+  scroll-snap-align: start;
+  padding: var(--space-16) var(--space-6);
+  padding-top: calc(var(--nav-height) + var(--space-12));
+}
+.module-content {
+  max-width: var(--content-width);
+  margin: 0 auto;
+}
+.module-header { margin-bottom: var(--space-12); }
+.module-number {
+  font-family: var(--font-display);
+  font-size: var(--text-6xl);
+  font-weight: 800;
+  color: var(--color-accent);
+  opacity: 0.15;
+  display: block;
+  line-height: 1;
+  margin-bottom: var(--space-2);
+}
+.module-title {
+  font-size: var(--text-4xl);
+  font-weight: 700;
+  margin-bottom: var(--space-3);
+}
+.module-subtitle {
+  font-size: var(--text-lg);
+  color: var(--color-text-secondary);
+}
+.screen { margin-bottom: var(--space-16); }
+.screen-heading {
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  margin-bottom: var(--space-6);
+}
+.screen p { margin-bottom: var(--space-4); max-width: 65ch; }
+
+/* ═══════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════ */
+.animate-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out);
+}
+.animate-in.visible { opacity: 1; transform: translateY(0); }
+.stagger-children > .animate-in {
+  transition-delay: calc(var(--stagger-index, 0) * var(--stagger-delay));
+}
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   CODE SYNTAX HIGHLIGHTING (Catppuccin)
+   ═══════════════════════════════════════════════════════ */
+.code-keyword  { color: #CBA6F7; }
+.code-string   { color: #A6E3A1; }
+.code-function { color: #89B4FA; }
+.code-comment  { color: #6C7086; }
+.code-number   { color: #FAB387; }
+.code-property { color: #F9E2AF; }
+.code-operator { color: #94E2D5; }
+.code-tag      { color: #F38BA8; }
+.code-type     { color: #89DCEB; }
+
+/* ═══════════════════════════════════════════════════════
+   CODE ↔ ENGLISH TRANSLATION BLOCKS
+   ═══════════════════════════════════════════════════════ */
+.translation-block {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0; border-radius: var(--radius-md);
+  overflow: hidden; box-shadow: var(--shadow-md);
+  margin: var(--space-8) 0;
+}
+.translation-code {
+  background: var(--color-bg-code); color: #CDD6F4;
+  padding: var(--space-6);
+  font-family: var(--font-mono); font-size: var(--text-sm);
+  line-height: 1.7; position: relative;
+  overflow-x: hidden;
+}
+.translation-code pre, .translation-code code {
+  white-space: pre-wrap; word-break: break-word; overflow-x: hidden;
+}
+.translation-english {
+  background: var(--color-surface-warm);
+  padding: var(--space-6);
+  font-size: var(--text-sm); line-height: 1.7;
+  border-left: 3px solid var(--color-accent);
+}
+.translation-label {
+  position: absolute; top: var(--space-2); right: var(--space-3);
+  font-size: var(--text-xs); text-transform: uppercase;
+  letter-spacing: 0.1em; opacity: 0.5;
+}
+.translation-english .translation-label {
+  position: relative; top: auto; right: auto;
+  color: var(--color-text-muted); display: block;
+  margin-bottom: var(--space-3);
+}
+.translation-lines { display: flex; flex-direction: column; gap: var(--space-3); }
+.tl { margin: 0; color: var(--color-text-secondary); }
+
+/* ═══════════════════════════════════════════════════════
+   CALLOUT BOXES
+   ═══════════════════════════════════════════════════════ */
+.callout {
+  display: flex; gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  border-radius: var(--radius-md);
+  margin: var(--space-8) 0;
+}
+.callout-icon { font-size: 1.5rem; flex-shrink: 0; }
+.callout-content { flex: 1; }
+.callout-title { display: block; margin-bottom: var(--space-2); font-family: var(--font-display); }
+.callout-accent { background: var(--color-accent-light); border-left: 4px solid var(--color-accent); }
+.callout-info { background: var(--color-info-light); border-left: 4px solid var(--color-info); }
+.callout-warning { background: var(--color-error-light); border-left: 4px solid var(--color-error); }
+
+/* ═══════════════════════════════════════════════════════
+   PATTERN / FEATURE CARDS
+   ═══════════════════════════════════════════════════════ */
+.pattern-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4);
+  margin: var(--space-8) 0;
+}
+.pattern-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-normal) var(--ease-out), box-shadow var(--duration-normal);
+}
+.pattern-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.pattern-icon {
+  width: 44px; height: 44px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem; margin-bottom: var(--space-3); color: white;
+}
+.pattern-title { font-family: var(--font-display); font-weight: 600; margin-bottom: var(--space-2); }
+.pattern-desc { font-size: var(--text-sm); color: var(--color-text-secondary); margin: 0; }
+
+/* ═══════════════════════════════════════════════════════
+   ICON ROWS
+   ═══════════════════════════════════════════════════════ */
+.icon-rows { display: flex; flex-direction: column; gap: var(--space-4); margin: var(--space-8) 0; }
+.icon-row {
+  display: flex; align-items: center; gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+.icon-row p { margin: 0; color: var(--color-text-secondary); font-size: var(--text-sm); }
+.icon-circle {
+  width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem; flex-shrink: 0; color: white;
+}
+
+/* ═══════════════════════════════════════════════════════
+   STEP CARDS
+   ═══════════════════════════════════════════════════════ */
+.step-cards { display: flex; flex-direction: column; gap: var(--space-3); margin: var(--space-8) 0; }
+.step-card {
+  display: flex; align-items: flex-start; gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-accent);
+  box-shadow: var(--shadow-sm);
+}
+.step-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--color-accent); color: white;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); flex-shrink: 0;
+}
+.step-body p { margin: var(--space-1) 0 0; color: var(--color-text-secondary); font-size: var(--text-sm); }
+
+/* ═══════════════════════════════════════════════════════
+   FILE TREE
+   ═══════════════════════════════════════════════════════ */
+.file-tree {
+  font-family: var(--font-mono); font-size: var(--text-sm);
+  background: var(--color-surface); border-radius: var(--radius-md);
+  padding: var(--space-6); box-shadow: var(--shadow-sm);
+  margin: var(--space-8) 0;
+}
+.ft-folder, .ft-file {
+  padding: var(--space-2) var(--space-3);
+  border-left: 2px solid var(--color-border-light);
+  margin-left: var(--space-4);
+}
+.ft-folder > .ft-name { color: var(--color-accent); font-weight: 600; }
+.ft-folder > .ft-name::before { content: '📁 '; }
+.ft-file > .ft-name::before { content: '📄 '; }
+.ft-desc {
+  color: var(--color-text-secondary); font-family: var(--font-body);
+  margin-left: var(--space-2); font-size: var(--text-xs);
+}
+.ft-children { margin-left: var(--space-4); }
+
+/* ═══════════════════════════════════════════════════════
+   GROUP CHAT ANIMATION
+   ═══════════════════════════════════════════════════════ */
+.chat-window {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  margin: var(--space-8) 0;
+}
+.chat-messages {
+  padding: var(--space-6);
+  min-height: 300px;
+  max-height: 500px;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: var(--space-4);
+}
+.chat-message { display: flex; gap: var(--space-3); align-items: flex-start; }
+.chat-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 700; font-size: var(--text-sm);
+  font-family: var(--font-display); flex-shrink: 0;
+}
+.chat-bubble {
+  background: var(--color-bg); border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  max-width: 80%;
+}
+.chat-sender {
+  font-weight: 600; font-size: var(--text-xs);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  display: block; margin-bottom: var(--space-1);
+}
+.chat-bubble p { margin: 0; font-size: var(--text-sm); }
+.chat-typing {
+  display: flex; gap: var(--space-3); align-items: center;
+  padding: 0 var(--space-6) var(--space-4);
+}
+.chat-typing-dots { display: flex; gap: 4px; }
+.typing-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--color-text-muted);
+  animation: typingBounce 1.4s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
+.chat-controls {
+  padding: var(--space-3) var(--space-6);
+  border-top: 1px solid var(--color-border-light);
+  display: flex; gap: var(--space-3); align-items: center;
+  background: var(--color-bg);
+}
+.chat-controls button {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  cursor: pointer; font-family: var(--font-body);
+  font-size: var(--text-sm);
+  transition: all var(--duration-fast);
+}
+.chat-controls button:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.chat-progress { font-size: var(--text-xs); color: var(--color-text-muted); margin-left: auto; }
+
+/* ═══════════════════════════════════════════════════════
+   DATA FLOW ANIMATION
+   ═══════════════════════════════════════════════════════ */
+.flow-animation {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-8);
+  margin: var(--space-8) 0;
+  text-align: center;
+}
+.flow-actors {
+  display: flex; justify-content: space-around; align-items: center;
+  flex-wrap: wrap; gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+.flow-actor {
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
+  padding: var(--space-4); border-radius: var(--radius-md);
+  border: 2px solid var(--color-border-light);
+  transition: all var(--duration-normal) var(--ease-out);
+  min-width: 100px;
+}
+.flow-actor.active {
+  box-shadow: 0 0 0 3px var(--color-accent), 0 0 20px rgba(217,79,48,0.2);
+  transform: scale(1.05);
+  border-color: var(--color-accent);
+}
+.flow-actor-icon {
+  width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 1.25rem; font-weight: 700;
+}
+.flow-actor span {
+  font-size: var(--text-xs); font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.flow-step-label {
+  font-size: var(--text-lg); color: var(--color-text);
+  margin-bottom: var(--space-6);
+  min-height: 3em;
+  font-family: var(--font-display); font-weight: 500;
+}
+.flow-controls {
+  display: flex; gap: var(--space-3); justify-content: center; align-items: center;
+}
+.flow-controls button {
+  padding: var(--space-2) var(--space-5);
+  border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+  background: var(--color-surface); cursor: pointer;
+  font-family: var(--font-body); font-size: var(--text-sm);
+  transition: all var(--duration-fast);
+}
+.flow-controls button:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.flow-progress { font-size: var(--text-xs); color: var(--color-text-muted); }
+
+/* ═══════════════════════════════════════════════════════
+   QUIZZES
+   ═══════════════════════════════════════════════════════ */
+.quiz-container { margin: var(--space-8) 0; }
+.quiz-question-block { margin-bottom: var(--space-8); }
+.quiz-question {
+  font-family: var(--font-display); font-size: var(--text-xl);
+  font-weight: 600; margin-bottom: var(--space-4);
+}
+.quiz-options { display: flex; flex-direction: column; gap: var(--space-3); }
+.quiz-option {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  cursor: pointer; width: 100%;
+  font-family: var(--font-body); font-size: var(--text-base);
+  text-align: left;
+  transition: border-color var(--duration-fast), background var(--duration-fast);
+}
+.quiz-option:hover { border-color: var(--color-accent-muted); }
+.quiz-option.selected { border-color: var(--color-accent); background: var(--color-accent-light); }
+.quiz-option.correct { border-color: var(--color-success); background: var(--color-success-light); }
+.quiz-option.incorrect { border-color: var(--color-error); background: var(--color-error-light); }
+.quiz-option-radio {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid var(--color-border);
+  transition: all var(--duration-fast); flex-shrink: 0;
+}
+.quiz-option.selected .quiz-option-radio {
+  border-color: var(--color-accent); background: var(--color-accent);
+  box-shadow: inset 0 0 0 3px white;
+}
+.quiz-feedback {
+  max-height: 0; overflow: hidden; opacity: 0;
+  transition: max-height var(--duration-normal), opacity var(--duration-normal), padding var(--duration-normal);
+}
+.quiz-feedback.show { max-height: 200px; opacity: 1; padding: var(--space-3); margin-top: var(--space-2); border-radius: var(--radius-sm); }
+.quiz-feedback.success { background: var(--color-success-light); color: var(--color-success); }
+.quiz-feedback.error { background: var(--color-error-light); color: var(--color-error); }
+.quiz-feedback.warning { background: var(--color-accent-light); color: var(--color-accent); }
+.quiz-check-btn, .quiz-reset-btn {
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body); font-size: var(--text-sm);
+  cursor: pointer; font-weight: 600;
+  transition: all var(--duration-fast);
+}
+.quiz-check-btn {
+  background: var(--color-accent); color: white; border: none;
+  margin-right: var(--space-3);
+}
+.quiz-check-btn:hover { background: var(--color-accent-hover); }
+.quiz-reset-btn {
+  background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text);
+}
+.quiz-reset-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.scenario-block {
+  background: var(--color-info-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-5) var(--space-6);
+  margin-bottom: var(--space-6);
+}
+.scenario-label {
+  font-family: var(--font-mono); font-size: var(--text-xs);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--color-info); display: block;
+  margin-bottom: var(--space-2);
+}
+
+/* ═══════════════════════════════════════════════════════
+   GLOSSARY TOOLTIPS
+   ═══════════════════════════════════════════════════════ */
+.term {
+  border-bottom: 1.5px dashed var(--color-accent-muted);
+  cursor: pointer; position: relative;
+}
+.term:hover, .term.active { border-bottom-color: var(--color-accent); color: var(--color-accent); }
+.term-tooltip {
+  position: fixed;
+  background: var(--color-bg-code); color: #CDD6F4;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm); font-family: var(--font-body);
+  line-height: var(--leading-normal);
+  width: max(200px, min(320px, 80vw));
+  box-shadow: var(--shadow-lg);
+  pointer-events: none; opacity: 0;
+  transition: opacity var(--duration-fast);
+  z-index: 10000;
+}
+.term-tooltip::after {
+  content: ''; position: absolute; top: 100%; left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--color-bg-code);
+}
+.term-tooltip.visible { opacity: 1; }
+.term-tooltip.flip::after { top: auto; bottom: 100%; border-top-color: transparent; border-bottom-color: var(--color-bg-code); }
+
+/* ═══════════════════════════════════════════════════════
+   HERO / INTRO
+   ═══════════════════════════════════════════════════════ */
+.hero {
+  min-height: 100dvh; min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  padding: var(--space-16) var(--space-6);
+  background: var(--color-bg);
+  scroll-snap-align: start;
+}
+.hero-inner { max-width: 640px; }
+.hero-badge {
+  display: inline-block;
+  font-family: var(--font-mono); font-size: var(--text-xs);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--color-accent); background: var(--color-accent-light);
+  padding: var(--space-1) var(--space-4);
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-6);
+}
+.hero h1 {
+  font-size: var(--text-5xl); font-weight: 800;
+  margin-bottom: var(--space-6);
+  line-height: var(--leading-tight);
+}
+.hero h1 em {
+  font-style: normal;
+  color: var(--color-accent);
+}
+.hero-desc {
+  font-size: var(--text-lg); color: var(--color-text-secondary);
+  max-width: 50ch; margin: 0 auto var(--space-8);
+}
+.hero-scroll {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  color: var(--color-text-muted); font-size: var(--text-sm);
+}
+.hero-scroll-arrow {
+  animation: bounceDown 2s infinite;
+}
+@keyframes bounceDown {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   BADGE LIST
+   ═══════════════════════════════════════════════════════ */
+.badge-list { display: flex; flex-direction: column; gap: var(--space-3); margin: var(--space-8) 0; }
+.badge-item {
+  display: flex; align-items: center; gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--duration-fast);
+}
+.badge-item:hover { border-color: var(--color-accent-muted); }
+.badge-code {
+  font-family: var(--font-mono); font-size: var(--text-sm);
+  background: var(--color-bg-code); color: #CBA6F7;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm); white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  :root { --text-4xl: 1.875rem; --text-5xl: 2.25rem; --text-6xl: 3rem; }
+  .translation-block { grid-template-columns: 1fr; }
+  .translation-english { border-left: none; border-top: 3px solid var(--color-accent); }
+  .pattern-cards { grid-template-columns: 1fr 1fr; }
+  .flow-actors { flex-direction: column; }
+}
+@media (max-width: 480px) {
+  :root { --text-4xl: 1.5rem; --text-5xl: 1.875rem; --text-6xl: 2.25rem; }
+  .module { padding: var(--space-8) var(--space-4); }
+  .pattern-cards { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     NAVIGATION
+     ═══════════════════════════════════════════════════════ -->
+<nav class="nav">
+  <div class="progress-bar" id="progress-bar"></div>
+  <div class="nav-inner">
+    <span class="nav-title">How Orbit Works</span>
+    <div class="nav-dots">
+      <button class="nav-dot" data-target="hero" onclick="scrollToModule('hero')"><span class="nav-dot-tip">Intro</span></button>
+      <button class="nav-dot" data-target="module-1" onclick="scrollToModule('module-1')"><span class="nav-dot-tip">What Is Orbit?</span></button>
+      <button class="nav-dot" data-target="module-2" onclick="scrollToModule('module-2')"><span class="nav-dot-tip">Meet the Cast</span></button>
+      <button class="nav-dot" data-target="module-3" onclick="scrollToModule('module-3')"><span class="nav-dot-tip">The Sync Pipeline</span></button>
+      <button class="nav-dot" data-target="module-4" onclick="scrollToModule('module-4')"><span class="nav-dot-tip">AI Brain</span></button>
+      <button class="nav-dot" data-target="module-5" onclick="scrollToModule('module-5')"><span class="nav-dot-tip">Warmth & Memory</span></button>
+      <button class="nav-dot" data-target="module-6" onclick="scrollToModule('module-6')"><span class="nav-dot-tip">Security</span></button>
+      <button class="nav-dot" data-target="module-7" onclick="scrollToModule('module-7')"><span class="nav-dot-tip">Big Picture</span></button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════
+     HERO
+     ═══════════════════════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <div class="hero-inner animate-in">
+    <span class="hero-badge">Interactive Course</span>
+    <h1>How <em>Orbit</em> Works Under the Hood</h1>
+    <p class="hero-desc">A personal CRM that syncs your Gmail and Calendar, uses AI to understand your relationships, and nudges you to stay in touch. Here's how every piece fits together — no coding experience required.</p>
+    <span class="hero-scroll">Scroll to begin <span class="hero-scroll-arrow">↓</span></span>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODULE 1 — WHAT IS ORBIT?
+     ═══════════════════════════════════════════════════════ -->
+<section class="module" id="module-1" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">What Orbit Actually Does</h1>
+      <p class="module-subtitle">A personal relationship manager that lives on your computer — not in the cloud</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The Problem It Solves</h2>
+        <p>You meet dozens of people — at conferences, over email, in meetings. Over time, relationships go cold. You forget to follow up. You lose track of who said what.</p>
+        <p>Orbit watches your email and calendar, figures out who matters, and tells you when to reach out — automatically.</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">📥</div>
+            <h4 class="pattern-title">Auto-Import</h4>
+            <p class="pattern-desc">Pulls contacts from Gmail, Calendar, and Google Contacts — no manual data entry.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🤖</div>
+            <h4 class="pattern-title">AI Summaries</h4>
+            <p class="pattern-desc">Reads your emails and meetings, then writes a one-sentence summary of each.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🌡️</div>
+            <h4 class="pattern-title">Warmth Scores</h4>
+            <p class="pattern-desc">Calculates a 0-100 "warmth" score for each relationship that decays over time.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">💡</div>
+            <h4 class="pattern-title">Smart Nudges</h4>
+            <p class="pattern-desc">Suggests when to follow up, send a thank-you, or check in on someone.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">A Day in the Life</h2>
+        <p>Imagine you open Orbit on a Monday morning. Here's what happens when you click "Analyze":</p>
+
+        <div class="step-cards stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>Orbit checks your Gmail</strong>
+              <p>Fetches new emails since your last sync. Filters out newsletters, promotions, and automated messages.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>Orbit checks your Calendar</strong>
+              <p>Pulls meetings and extracts who attended each one.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>AI summarizes everything</strong>
+              <p>Each email and meeting gets a one-sentence summary: key decisions, commitments, and next steps.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <strong>AI suggests actions</strong>
+              <p>"Follow up with Sarah about the proposal" or "Send a thank-you to Alex for the intro."</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <strong>Warmth scores update</strong>
+              <p>Contacts you've been in touch with get warmer. Everyone else cools down a little.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What Makes It Special: Local-First</h2>
+        <p>Unlike most apps, Orbit runs <em>entirely on your computer</em>. No cloud servers. No monthly subscriptions. Your data never leaves your machine.</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight: Local-First Software</strong>
+            <p>Most apps today send your data to a company's servers. "Local-first" means the app stores everything on YOUR computer using a <span class="term" data-definition="A database is like a super-organized filing cabinet that software uses to store and retrieve data quickly. Unlike a spreadsheet, a database can handle millions of records and find any one of them in milliseconds.">database</span> file. No internet required, no data privacy concerns, and it works forever — even if the company disappears.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz for Module 1 -->
+      <section class="screen animate-in" id="quiz-m1">
+        <h2 class="screen-heading">Check Your Understanding</h2>
+        <div class="quiz-container">
+          <div class="quiz-question-block" data-question="m1q1" data-correct="m1q1-c">
+            <div class="scenario-block">
+              <span class="scenario-label">Scenario</span>
+              <p>You want to add a feature where Orbit also tracks LinkedIn messages. What part of the system would need to change first?</p>
+            </div>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="m1q1-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The warmth score algorithm</span>
+              </button>
+              <button class="quiz-option" data-value="m1q1-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The AI summary prompt</span>
+              </button>
+              <button class="quiz-option" data-value="m1q1-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The sync step — you'd need a new data source alongside Gmail and Calendar</span>
+              </button>
+            </div>
+            <div class="quiz-feedback" id="m1q1-feedback" data-correct-text="The sync pipeline is where Orbit connects to external services. LinkedIn would be a new data source, just like Gmail and Calendar are today. The AI and warmth pieces would work the same — they just process whatever interactions exist." data-incorrect-text="The sync pipeline is where Orbit connects to data sources. That's where a new LinkedIn connection would plug in — everything downstream (AI, warmth) already handles any interaction type."></div>
+          </div>
+
+          <div class="quiz-question-block" data-question="m1q2" data-correct="m1q2-b">
+            <h3 class="quiz-question">Why does Orbit store data locally instead of in the cloud?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="m1q2-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Because local storage is faster than cloud storage</span>
+              </button>
+              <button class="quiz-option" data-value="m1q2-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Privacy — your email and relationship data never leaves your computer</span>
+              </button>
+              <button class="quiz-option" data-value="m1q2-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Cloud databases are too expensive for a personal tool</span>
+              </button>
+            </div>
+            <div class="quiz-feedback" id="m1q2-feedback" data-correct-text="Privacy is the core motivation. Orbit processes sensitive data — your emails, meetings, and relationships. Keeping it all local means you control it completely. Speed and cost are bonuses, but privacy is the reason." data-incorrect-text="While speed is a nice benefit, the main reason is privacy. Your emails and relationship data are deeply personal. Keeping everything local means no company ever sees that data."></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m1')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m1')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODULE 2 — MEET THE CAST
+     ═══════════════════════════════════════════════════════ -->
+<section class="module" id="module-2" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">Meet the Cast of Characters</h1>
+      <p class="module-subtitle">The major pieces of Orbit and what each one is responsible for</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The Tech Stack</h2>
+        <p>Think of Orbit like a theater production. The tech stack is the set of tools that play different roles on stage.</p>
+
+        <div class="icon-rows stagger-children">
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-1)">🖥️</div>
+            <div>
+              <strong><span class="term" data-definition="Next.js is a framework for building web applications. It handles both what the user sees (the pages) and the behind-the-scenes logic (the server). Think of it as a Swiss Army knife for web apps.">Next.js</span> (Frontend + Backend)</strong>
+              <p>The framework that runs everything — both the pages you see and the behind-the-scenes logic</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-2)">🗄️</div>
+            <div>
+              <strong><span class="term" data-definition="SQLite is a lightweight database that stores all its data in a single file on your computer. No server needed — it's like having a filing cabinet built right into the app.">SQLite</span> (Database)</strong>
+              <p>A tiny database that lives as a single file on your computer — all your contacts, emails, and scores</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-3)">🧠</div>
+            <div>
+              <strong><span class="term" data-definition="The OpenAI API lets your app send text to AI models like GPT-4 and get intelligent responses back. You pay per use — like a utility bill for intelligence.">OpenAI API</span> (AI Brain)</strong>
+              <p>GPT-4o and GPT-4o-mini provide the intelligence — summaries, suggestions, and chat</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-4)">📨</div>
+            <div>
+              <strong><span class="term" data-definition="Google APIs are gateways that let apps read data from Google services (Gmail, Calendar, Contacts) on your behalf, after you grant permission.">Google APIs</span> (Data Sources)</strong>
+              <p>Gmail, Calendar, and Contacts — where Orbit pulls your relationship data from</p>
+            </div>
+          </div>
+          <div class="icon-row animate-in">
+            <div class="icon-circle" style="background: var(--color-actor-5)">⚡</div>
+            <div>
+              <strong><span class="term" data-definition="TanStack Query is a library that manages data fetching in a web app. It handles caching (remembering previous results), automatic refreshing, and keeping the UI in sync with the server — so you don't have to write all that code yourself.">TanStack Query</span> (State Manager)</strong>
+              <p>Keeps the data on screen fresh — auto-refreshes, caches, and syncs the UI</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">How the Code Is Organized</h2>
+        <p>Orbit's codebase follows a layered structure — like a building with distinct floors.</p>
+
+        <div class="file-tree">
+          <div class="ft-folder open">
+            <span class="ft-name">src/</span>
+            <span class="ft-desc">All the source code</span>
+            <div class="ft-children">
+              <div class="ft-folder open">
+                <span class="ft-name">app/</span>
+                <span class="ft-desc">Pages the user sees + API routes</span>
+                <div class="ft-children">
+                  <div class="ft-folder">
+                    <span class="ft-name">(app)/</span>
+                    <span class="ft-desc">Dashboard, Contacts, Reminders, Settings pages</span>
+                  </div>
+                  <div class="ft-folder">
+                    <span class="ft-name">api/</span>
+                    <span class="ft-desc">Backend endpoints — the "phone lines" the frontend calls</span>
+                  </div>
+                </div>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">services/</span>
+                <span class="ft-desc">Business logic — syncing, summarizing, scoring, chatting</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">components/</span>
+                <span class="ft-desc">Reusable UI building blocks (cards, lists, modals)</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">lib/</span>
+                <span class="ft-desc">Shared utilities — database connection, encryption, email filtering</span>
+              </div>
+              <div class="ft-folder">
+                <span class="ft-name">hooks/</span>
+                <span class="ft-desc">Data-fetching helpers that connect the UI to the API</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight: Separation of Concerns</strong>
+            <p>Notice how the code is split into layers — pages, <span class="term" data-definition="An API route (or endpoint) is a specific URL that your app's frontend can call to ask the backend to do something. Think of it like a specific phone extension at a company — each one connects you to a different department.">API routes</span>, services, and utilities. Each layer has one job. This pattern — called "separation of concerns" — makes it easy to change one part without breaking everything else. When talking to an AI coding agent, you can say "put this logic in the service layer, not the API route" and it knows exactly what you mean.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz for Module 2 -->
+      <section class="screen animate-in" id="quiz-m2">
+        <h2 class="screen-heading">Check Your Understanding</h2>
+        <div class="quiz-container">
+          <div class="quiz-question-block" data-question="m2q1" data-correct="m2q1-b">
+            <div class="scenario-block">
+              <span class="scenario-label">Scenario</span>
+              <p>You're telling an AI coding agent to change how warmth scores are calculated. Where should you tell it to look?</p>
+            </div>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="m2q1-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>src/app/(app)/page.tsx — the dashboard page</span>
+              </button>
+              <button class="quiz-option" data-value="m2q1-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>src/services/warmth.service.ts — the warmth service</span>
+              </button>
+              <button class="quiz-option" data-value="m2q1-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>src/components/contacts/WarmthBar.tsx — the warmth bar component</span>
+              </button>
+            </div>
+            <div class="quiz-feedback" id="m2q1-feedback" data-correct-text="Business logic like score calculation lives in the services layer. The dashboard page only displays the score, and the WarmthBar component only renders the visual bar. By pointing AI to the right file, you save time and avoid accidental changes elsewhere." data-incorrect-text="The services folder holds business logic. warmth.service.ts contains the actual calculation — the page and component just display the result."></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m2')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m2')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODULE 3 — THE SYNC PIPELINE
+     ═══════════════════════════════════════════════════════ -->
+<section class="module" id="module-3" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">The Sync Pipeline</h1>
+      <p class="module-subtitle">What happens when you click "Analyze" — a five-step assembly line</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">An Assembly Line for Relationships</h2>
+        <p>Think of a car factory. Raw materials enter one end, and a finished car rolls out the other. Each station does one job. Orbit's sync pipeline works the same way — raw data (emails, calendar events) enters, and polished relationship intelligence comes out.</p>
+
+        <div class="flow-animation" id="flow-sync">
+          <div class="flow-actors">
+            <div class="flow-actor" id="flow-gmail">
+              <div class="flow-actor-icon" style="background: var(--color-actor-4)">📨</div>
+              <span>Gmail</span>
+            </div>
+            <div class="flow-actor" id="flow-calendar">
+              <div class="flow-actor-icon" style="background: var(--color-actor-4)">📅</div>
+              <span>Calendar</span>
+            </div>
+            <div class="flow-actor" id="flow-db">
+              <div class="flow-actor-icon" style="background: var(--color-actor-2)">🗄️</div>
+              <span>Database</span>
+            </div>
+            <div class="flow-actor" id="flow-ai">
+              <div class="flow-actor-icon" style="background: var(--color-actor-3)">🧠</div>
+              <span>AI</span>
+            </div>
+            <div class="flow-actor" id="flow-warmth">
+              <div class="flow-actor-icon" style="background: var(--color-actor-1)">🌡️</div>
+              <span>Warmth</span>
+            </div>
+          </div>
+          <div class="flow-step-label" id="flow-sync-label">Click "Next Step" to trace the pipeline</div>
+          <div class="flow-controls">
+            <button onclick="flowSyncNext()">Next Step</button>
+            <button onclick="flowSyncReset()">Restart</button>
+            <span class="flow-progress" id="flow-sync-progress">Step 0 / 5</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The Real Code Behind Step 1: Filtering Junk</h2>
+        <p>Before Orbit processes any email, it filters out the noise. Newsletters, automated receipts, and bot messages get thrown out. Here's how:</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-keyword">const</span> <span class="code-property">BLOCKED_PREFIXES</span> = [
+  <span class="code-string">"noreply"</span>, <span class="code-string">"no-reply"</span>, <span class="code-string">"no_reply"</span>,
+  <span class="code-string">"donotreply"</span>, <span class="code-string">"do-not-reply"</span>,
+  <span class="code-string">"mailer-daemon"</span>, <span class="code-string">"postmaster"</span>,
+  <span class="code-string">"notifications"</span>, <span class="code-string">"newsletter"</span>,
+  <span class="code-string">"unsubscribe"</span>, <span class="code-string">"receipts"</span>,
+];</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Create a list of email name patterns that are definitely not real people.</p>
+              <p class="tl">If the part before the @ symbol matches any of these — like "noreply@company.com" — the email gets skipped.</p>
+              <p class="tl">This is the first line of defense. It catches the obvious junk before the AI even sees it.</p>
+            </div>
+          </div>
+        </div>
+
+        <p>But what about borderline cases — like "team@startup.com" which could be a person or a mailing list? For those, Orbit sends a batch of up to 80 email addresses to <span class="term" data-definition="GPT-4o-mini is a faster, cheaper version of OpenAI's GPT-4 model. It's great for simple tasks like classification and summarization where you don't need the most powerful reasoning.">GPT-4o-mini</span> and asks: "Which of these are real people?"</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Graceful Failure: The Safety Net</h2>
+        <p>Here's something clever about this pipeline — every step is wrapped in its own safety net. If Gmail sync fails, Calendar sync still runs. If AI summarization breaks for one email, the others still get processed.</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-keyword">try</span> {
+  <span class="code-keyword">const</span> gmailResult = <span class="code-keyword">await</span> <span class="code-function">syncGmail</span>(userId, account.id);
+  gmail = gmailResult.syncedCount;
+} <span class="code-keyword">catch</span> (err) {
+  console.<span class="code-function">error</span>(<span class="code-string">`Gmail sync failed:`</span>, err);
+}</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl"><strong>Try</strong> to sync Gmail and count how many new emails we got.</p>
+              <p class="tl">Save the count so we can report it later.</p>
+              <p class="tl"><strong>If anything goes wrong</strong>, just log the error and keep going.</p>
+              <p class="tl">Don't crash. Don't stop the whole pipeline. Just note the problem and move on.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🔑</div>
+          <div class="callout-content">
+            <strong class="callout-title">Why This Matters for You</strong>
+            <p>When directing an AI to build a multi-step process, always ask for <span class="term" data-definition="A try/catch block is a safety net in code. The 'try' part runs the risky operation, and if it fails, the 'catch' part handles the error gracefully — like a trapeze artist with a net below.">try/catch</span> around each step. Say: "Each step should fail independently — don't let one broken step crash the whole pipeline." This is the difference between an app that's fragile and one that's resilient.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Group Chat: The Analyze Pipeline -->
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The Pipeline as a Conversation</h2>
+        <p>Let's watch the sync pipeline play out as if the components were messaging each other:</p>
+
+        <div class="chat-window" id="chat-sync">
+          <div class="chat-messages" id="chat-sync-messages">
+            <div class="chat-message" data-msg="0" data-sender="dashboard" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">D</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Dashboard</span>
+                <p>User clicked Analyze! Sending POST to /api/sync/analyze...</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="1" data-sender="api" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">A</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">API Route</span>
+                <p>Got it. Let me check for connected Google accounts... Found 1. Starting Gmail sync.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="2" data-sender="gmail" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-4)">G</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-4)">Gmail Service</span>
+                <p>Fetching emails since last sync... Found 12 new ones. Filtered out 4 newsletters. Saved 8 interactions.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="3" data-sender="summarizer" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-3)">S</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-3)">Summarizer</span>
+                <p>I see 8 unsummarized interactions. Running 8 calls to GPT-4o-mini in parallel (max 10 at a time)... Done. All summarized!</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="4" data-sender="actions" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-5)">AI</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-5)">Action Items</span>
+                <p>3 contacts had activity today. Asking GPT-4o to analyze each... Generated 5 suggestions total. "Follow up with Sarah about the proposal" — priority 4.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="5" data-sender="warmth" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-1)">W</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-1)">Warmth Engine</span>
+                <p>Recalculating all warmth scores... Sarah went from 45 → 72. Mike dropped from 30 → 18 (going cold!). Done.</p>
+              </div>
+            </div>
+            <div class="chat-message" data-msg="6" data-sender="api" style="display:none">
+              <div class="chat-avatar" style="background: var(--color-actor-2)">A</div>
+              <div class="chat-bubble">
+                <span class="chat-sender" style="color: var(--color-actor-2)">API Route</span>
+                <p>Pipeline complete! Returning results: { gmail: 8, summarized: 8, actionItems: 5, warmthUpdated: true }</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-typing" id="chat-sync-typing" style="display:none">
+            <div class="chat-avatar" id="chat-sync-typing-avatar" style="background: var(--color-text-muted)">?</div>
+            <div class="chat-typing-dots">
+              <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+            </div>
+          </div>
+          <div class="chat-controls">
+            <button onclick="playSyncChatNext()">Next Message</button>
+            <button onclick="playSyncChatAll()">Play All</button>
+            <button onclick="resetSyncChat()">Replay</button>
+            <span class="chat-progress" id="chat-sync-progress">0 / 7 messages</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz for Module 3 -->
+      <section class="screen animate-in" id="quiz-m3">
+        <h2 class="screen-heading">Check Your Understanding</h2>
+        <div class="quiz-container">
+          <div class="quiz-question-block" data-question="m3q1" data-correct="m3q1-b">
+            <div class="scenario-block">
+              <span class="scenario-label">Scenario</span>
+              <p>Gmail sync fails because your Google token expired, but Calendar sync works fine. What happens?</p>
+            </div>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="m3q1-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The entire pipeline crashes and returns an error</span>
+              </button>
+              <button class="quiz-option" data-value="m3q1-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Calendar data still syncs, summaries still run, warmth still updates — only Gmail is skipped</span>
+              </button>
+              <button class="quiz-option" data-value="m3q1-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Orbit retries Gmail automatically until it works</span>
+              </button>
+            </div>
+            <div class="quiz-feedback" id="m3q1-feedback" data-correct-text="Each step has its own try/catch safety net. A Gmail failure is logged and skipped — everything else runs normally. This 'fail independently' pattern is what makes the pipeline robust." data-incorrect-text="Because each step is wrapped in its own try/catch, a Gmail failure doesn't affect the rest. Calendar, summaries, action items, and warmth all continue running."></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m3')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m3')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODULE 4 — THE AI BRAIN
+     ═══════════════════════════════════════════════════════ -->
+<section class="module" id="module-4" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">The AI Brain</h1>
+      <p class="module-subtitle">How Orbit uses two different AI models — and why it picks each one</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Two Models, Two Jobs</h2>
+        <p>Orbit doesn't just throw everything at one AI model. It uses the right tool for the job — like hiring a junior assistant for simple tasks and a senior advisor for complex ones.</p>
+
+        <div class="pattern-cards">
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">⚡</div>
+            <h4 class="pattern-title">GPT-4o-mini</h4>
+            <p class="pattern-desc">Fast and cheap. Used for simple tasks: summarizing emails, classifying whether an address is a real person. Runs hundreds of times per sync.</p>
+          </div>
+          <div class="pattern-card" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🧠</div>
+            <h4 class="pattern-title">GPT-4o</h4>
+            <p class="pattern-desc">Powerful and thoughtful. Used for complex reasoning: analyzing relationships, generating follow-up suggestions, powering the chat. Runs a few times per sync.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight: Model Selection Matters</strong>
+            <p>Using the biggest AI model for everything is like taking a helicopter to the grocery store — expensive and unnecessary. Smart apps pick the cheapest model that's good enough for each task. When building with AI, always ask: "Does this task need deep reasoning, or just pattern matching?" Use the smaller model when you can, the bigger one when you must.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">How the Summarizer Works</h2>
+        <p>Every email and meeting gets a one-sentence summary. Here's the actual code that talks to the AI:</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-function">getOpenAI</span>().chat.completions.<span class="code-function">create</span>({
+  <span class="code-property">model</span>: <span class="code-string">"gpt-4o-mini"</span>,
+  <span class="code-property">messages</span>: [
+    { <span class="code-property">role</span>: <span class="code-string">"system"</span>, <span class="code-property">content</span>: systemPrompt },
+    { <span class="code-property">role</span>: <span class="code-string">"user"</span>, <span class="code-property">content</span>: userMessage },
+  ],
+  <span class="code-property">max_tokens</span>: <span class="code-number">150</span>,
+  <span class="code-property">temperature</span>: <span class="code-number">0.3</span>,
+});</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Connect to OpenAI and ask the AI to generate a response...</p>
+              <p class="tl">Use the fast, cheap model (gpt-4o-mini) — good enough for summaries.</p>
+              <p class="tl">Send two messages: a "system" message that defines the AI's personality and rules...</p>
+              <p class="tl">...and a "user" message with the actual email content to summarize.</p>
+              <p class="tl">Limit the response to 150 <span class="term" data-definition="Tokens are the units AI models use to measure text. Roughly: 1 token ≈ ¾ of a word. So 150 tokens ≈ about 110 words. AI APIs charge per token, so limiting tokens controls cost.">tokens</span> (about 2 sentences).</p>
+              <p class="tl">Set <span class="term" data-definition="Temperature controls how creative vs. predictable an AI response is. 0 = always the most likely answer (robotic). 1 = more random and creative. 0.3 is 'mostly factual with a little flexibility.'">temperature</span> to 0.3 — keep it factual and consistent, not creative.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">How Action Items Are Generated</h2>
+        <p>This is where the bigger AI model shines. It looks at your recent interactions with someone and decides: should you follow up? Send a thank-you? Check in?</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-keyword">const</span> systemPrompt = <span class="code-string">`You are a proactive PRM assistant.
+Return a JSON array of action items.
+Each item must have:
+  "type": "follow_up" | "thank_you" | "check_in"
+  "title": "Short action title"
+  "body": "Why this action is recommended"
+  "priority": 1-5`</span>;</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">This is the "instruction manual" given to the AI before it sees any data.</p>
+              <p class="tl">It tells the AI: "You're a relationship assistant. Your job is to suggest actions."</p>
+              <p class="tl">It specifies the exact format the response must follow — <span class="term" data-definition="JSON (JavaScript Object Notation) is a way to structure data that both humans and computers can read. It looks like: { 'name': 'Alice', 'age': 30 }. It's the universal language apps use to exchange data.">JSON</span> with specific fields.</p>
+              <p class="tl">By defining the format in advance, the app can reliably parse the AI's response without guessing.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">🔑</div>
+          <div class="callout-content">
+            <strong class="callout-title">Prompt Engineering in Action</strong>
+            <p>Notice how the <span class="term" data-definition="A system prompt is an instruction message sent to the AI before the actual conversation. It defines the AI's personality, rules, and output format. The user never sees it, but it shapes every response.">system prompt</span> tells the AI exactly what format to use. This is called "structured output" — you tell the AI to return data in a specific shape so your code can reliably read it. When building AI features, always define the output format in the system prompt.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz for Module 4 -->
+      <section class="screen animate-in" id="quiz-m4">
+        <h2 class="screen-heading">Check Your Understanding</h2>
+        <div class="quiz-container">
+          <div class="quiz-question-block" data-question="m4q1" data-correct="m4q1-a">
+            <div class="scenario-block">
+              <span class="scenario-label">Scenario</span>
+              <p>You want to add a new AI feature: automatically tagging contacts by industry (tech, finance, healthcare, etc.). Which model would you pick?</p>
+            </div>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="m4q1-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>GPT-4o-mini — it's a simple classification task, doesn't need deep reasoning</span>
+              </button>
+              <button class="quiz-option" data-value="m4q1-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>GPT-4o — you need the most powerful model for accuracy</span>
+              </button>
+              <button class="quiz-option" data-value="m4q1-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Neither — this should be done with a keyword list, not AI</span>
+              </button>
+            </div>
+            <div class="quiz-feedback" id="m4q1-feedback" data-correct-text="Classification tasks — 'is this tech, finance, or healthcare?' — are pattern matching, not deep reasoning. GPT-4o-mini handles this well and you'd be running it on potentially hundreds of contacts, so cost matters." data-incorrect-text="For simple classification (picking a category from a list), GPT-4o-mini is the right choice. Save GPT-4o for tasks that need nuanced judgment, like relationship analysis."></div>
+          </div>
+
+          <div class="quiz-question-block" data-question="m4q2" data-correct="m4q2-c">
+            <h3 class="quiz-question">Why does the action items service set temperature to 0.4 instead of something higher like 0.9?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="m4q2-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Lower temperature makes the AI respond faster</span>
+              </button>
+              <button class="quiz-option" data-value="m4q2-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Lower temperature uses fewer tokens</span>
+              </button>
+              <button class="quiz-option" data-value="m4q2-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>You want consistent, reliable suggestions — not wildly creative ones</span>
+              </button>
+            </div>
+            <div class="quiz-feedback" id="m4q2-feedback" data-correct-text="Temperature controls randomness. For action items, you want suggestions grounded in the actual data — not creative fiction. 0.4 allows a little flexibility while staying reliable. A chatbot might use 0.8, but business logic should stay lower." data-incorrect-text="Temperature doesn't affect speed or token count — it controls creativity vs. consistency. At 0.4, the AI stays grounded in facts while having just enough flexibility to write natural-sounding suggestions."></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m4')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m4')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODULE 5 — WARMTH & MEMORY
+     ═══════════════════════════════════════════════════════ -->
+<section class="module" id="module-5" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">Warmth Scores & Auto-Reminders</h1>
+      <p class="module-subtitle">How Orbit tracks relationship health and knows when to nudge you</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The Warmth Score: A Relationship Thermometer</h2>
+        <p>Imagine a campfire. If you keep adding wood (interactions), it stays warm. Stop feeding it, and it slowly dies out. That's exactly how warmth scores work — every interaction adds heat, and time makes it fade.</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-keyword">const</span> <span class="code-property">TYPE_WEIGHTS</span>: Record&lt;string, number&gt; = {
+  <span class="code-property">meeting</span>: <span class="code-number">3</span>,
+  <span class="code-property">email_sent</span>: <span class="code-number">2</span>,
+  <span class="code-property">email_received</span>: <span class="code-number">1</span>,
+};
+
+<span class="code-keyword">const</span> <span class="code-property">DECAY_WINDOW_MS</span> = <span class="code-number">90</span> * <span class="code-number">24</span> * <span class="code-number">60</span> * <span class="code-number">60</span> * <span class="code-number">1000</span>;</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Different interactions are worth different amounts:</p>
+              <p class="tl">A face-to-face meeting is worth <strong>3 points</strong> (most valuable)</p>
+              <p class="tl">Sending an email is worth <strong>2 points</strong> (you took initiative)</p>
+              <p class="tl">Receiving an email is worth <strong>1 point</strong> (they reached out)</p>
+              <p class="tl">The "decay window" is 90 days — interactions older than that don't count at all.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The Freshness Formula</h2>
+        <p>Here's the core algorithm — the math that turns interaction history into a single number:</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-keyword">for</span> (<span class="code-keyword">const</span> interaction <span class="code-keyword">of</span> interactionList) {
+  <span class="code-keyword">const</span> weight = <span class="code-property">TYPE_WEIGHTS</span>[interaction.type] ?? <span class="code-number">1</span>;
+  <span class="code-keyword">const</span> ageMs = now - occurredAt;
+  <span class="code-keyword">const</span> freshness = Math.<span class="code-function">max</span>(<span class="code-number">0</span>, <span class="code-number">1</span> - ageMs / DECAY_WINDOW_MS);
+  totalScore += weight * <span class="code-number">10</span> * freshness;
+}
+<span class="code-keyword">return</span> Math.<span class="code-function">min</span>(<span class="code-number">100</span>, Math.<span class="code-function">round</span>(totalScore));</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Go through every interaction with this contact...</p>
+              <p class="tl">Look up how much this type of interaction is worth (3 for meetings, 2 for sent emails, 1 for received).</p>
+              <p class="tl">Calculate how old this interaction is.</p>
+              <p class="tl">Calculate "freshness" — a meeting yesterday has freshness near 1.0, a meeting 80 days ago has freshness near 0.1.</p>
+              <p class="tl">Add: weight × 10 × freshness to the running total. A recent meeting adds ~30 points. An old email adds ~2.</p>
+              <p class="tl">Cap the final score at 100. Nobody can score higher than 100.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Auto-Reminders: The Smart Nudge System</h2>
+        <p>Orbit doesn't just score relationships — it acts on those scores. Four types of automatic reminders:</p>
+
+        <div class="badge-list stagger-children">
+          <div class="badge-item animate-in">
+            <code class="badge-code">[cold]</code>
+            <span>Warmth below 20 — "Reach out to Sarah — your relationship is cooling down"</span>
+          </div>
+          <div class="badge-item animate-in">
+            <code class="badge-code">[no-contact]</code>
+            <span>No interaction for 30+ days — "You haven't talked to Mike in over a month"</span>
+          </div>
+          <div class="badge-item animate-in">
+            <code class="badge-code">[follow-up]</code>
+            <span>Received email with no reply — "Follow up on Alex's message about the project"</span>
+          </div>
+          <div class="badge-item animate-in">
+            <code class="badge-code">[meeting]</code>
+            <span>Recent meeting occurred — "Debrief: your meeting with the design team"</span>
+          </div>
+        </div>
+
+        <p>The clever part? Reminders <em>auto-dismiss</em>. If you email someone after getting a "[cold]" reminder, Orbit marks it as completed automatically. It adapts to what you actually do.</p>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight: Time-Decaying Scores</strong>
+            <p>This pattern — giving more weight to recent events and letting old ones fade — appears everywhere in software. Search engines use it (recent pages rank higher), recommendation systems use it (recent purchases matter more), and social feeds use it (newer posts appear first). The formal name is "exponential decay." When you want your AI app to prioritize recent data, ask for "time-weighted scoring with decay."</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz for Module 5 -->
+      <section class="screen animate-in" id="quiz-m5">
+        <h2 class="screen-heading">Check Your Understanding</h2>
+        <div class="quiz-container">
+          <div class="quiz-question-block" data-question="m5q1" data-correct="m5q1-c">
+            <div class="scenario-block">
+              <span class="scenario-label">Scenario</span>
+              <p>Contact "Lisa" has a warmth score of 15. You had a meeting with her 2 days ago but the score hasn't updated yet. What's wrong?</p>
+            </div>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="m5q1-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The meeting wasn't synced from your calendar</span>
+              </button>
+              <button class="quiz-option" data-value="m5q1-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Meetings only count if you sent the invite</span>
+              </button>
+              <button class="quiz-option" data-value="m5q1-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>You need to run the Analyze pipeline — warmth recalculates at step 5</span>
+              </button>
+            </div>
+            <div class="quiz-feedback" id="m5q1-feedback" data-correct-text="Warmth scores only recalculate when the sync/analyze pipeline runs (step 5). If you haven't clicked Analyze since the meeting, the score won't reflect it yet. This is a common debugging insight — scores aren't live, they update on sync." data-incorrect-text="Warmth recalculation is step 5 of the Analyze pipeline. If it hasn't run since your meeting, the score is stale. Click Analyze to refresh."></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m5')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m5')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODULE 6 — SECURITY & ENCRYPTION
+     ═══════════════════════════════════════════════════════ -->
+<section class="module" id="module-6" style="background: var(--color-bg)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">Security: Keeping Secrets Safe</h1>
+      <p class="module-subtitle">How Orbit protects your Google tokens with military-grade encryption</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The Problem: Storing Passwords</h2>
+        <p>When you connect your Google account, Google gives Orbit a special key (called a <span class="term" data-definition="An OAuth token is a temporary key that lets an app access your account on another service (like Gmail) without knowing your password. Think of it like a hotel key card — it opens specific doors for a limited time.">token</span>) that lets it read your email and calendar. If someone got that key, they could read all your emails.</p>
+        <p>Orbit can't just store these tokens in plain text — that would be like writing your house key code on the front door. Instead, it <span class="term" data-definition="Encryption scrambles data so that only someone with the right key can read it. The original data is called 'plaintext,' the scrambled version is 'ciphertext.' Without the key, the ciphertext looks like random gibberish.">encrypts</span> them.</p>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">How Encryption Works: The Lockbox</h2>
+        <p>Think of encryption like a lockbox with a combination. You put a letter inside, scramble the lock, and only someone with the combination can open it. Here's the actual code:</p>
+
+        <div class="translation-block">
+          <div class="translation-code">
+            <span class="translation-label">CODE</span>
+            <pre><code><span class="code-keyword">const</span> iv = crypto.<span class="code-function">randomBytes</span>(<span class="code-number">12</span>);
+<span class="code-keyword">const</span> cipher = crypto.<span class="code-function">createCipheriv</span>(
+  <span class="code-string">"aes-256-gcm"</span>, key, iv
+);
+<span class="code-keyword">let</span> encrypted = cipher.<span class="code-function">update</span>(plaintext, <span class="code-string">"utf8"</span>, <span class="code-string">"hex"</span>);
+encrypted += cipher.<span class="code-function">final</span>(<span class="code-string">"hex"</span>);
+<span class="code-keyword">const</span> authTag = cipher.<span class="code-function">getAuthTag</span>();
+<span class="code-keyword">return</span> <span class="code-string">`${iv}:${authTag}:${encrypted}`</span>;</code></pre>
+          </div>
+          <div class="translation-english">
+            <span class="translation-label">PLAIN ENGLISH</span>
+            <div class="translation-lines">
+              <p class="tl">Generate 12 random bytes — like spinning the lockbox dial to a random starting position. This ensures encrypting the same text twice gives different results.</p>
+              <p class="tl">Create the encryption tool using <span class="term" data-definition="AES-256-GCM is one of the strongest encryption algorithms available. AES = the encryption method, 256 = the key size in bits (extremely hard to crack), GCM = a mode that also verifies the data hasn't been tampered with.">AES-256-GCM</span> — the same standard used by banks and governments.</p>
+              <p class="tl">Feed in the secret text (the Google token) and get back scrambled gibberish.</p>
+              <p class="tl">Finish the encryption process.</p>
+              <p class="tl">Get the "authentication tag" — this proves the data hasn't been tampered with later.</p>
+              <p class="tl">Pack everything together: random-start-position : tamper-check : scrambled-data</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The Full Security Model</h2>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🔐</div>
+            <h4 class="pattern-title">Tokens Encrypted at Rest</h4>
+            <p class="pattern-desc">Google tokens are encrypted before being saved. Even if someone copies your database file, they can't read the tokens without the encryption key.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🏠</div>
+            <h4 class="pattern-title">Localhost Only</h4>
+            <p class="pattern-desc">Orbit only listens on your own computer (localhost:3000). No one on the internet can connect to it.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">📁</div>
+            <h4 class="pattern-title">User-Only File Permissions</h4>
+            <p class="pattern-desc">The config file (~/.orbit/.env) is created with permissions that only your user account can read.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-accent">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <strong class="callout-title">Key Insight: Defense in Depth</strong>
+            <p>Good security isn't one big wall — it's many layers, like an onion. Each layer protects against a different threat. Encryption protects the database file. Localhost protects the network. File permissions protect the config. If one layer fails, the others still hold. When asking AI to build secure features, say: "I want defense in depth — encrypt sensitive data, restrict network access, and limit file permissions."</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quiz for Module 6 -->
+      <section class="screen animate-in" id="quiz-m6">
+        <h2 class="screen-heading">Check Your Understanding</h2>
+        <div class="quiz-container">
+          <div class="quiz-question-block" data-question="m6q1" data-correct="m6q1-b">
+            <div class="scenario-block">
+              <span class="scenario-label">Scenario</span>
+              <p>Someone copies the orbit.db database file from your computer. Can they read your Gmail?</p>
+            </div>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="m6q1-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Yes — the database has the Google tokens</span>
+              </button>
+              <button class="quiz-option" data-value="m6q1-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>No — the tokens are encrypted and they'd need the ENCRYPTION_KEY from the separate .env file</span>
+              </button>
+              <button class="quiz-option" data-value="m6q1-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>No — the tokens expire after one use</span>
+              </button>
+            </div>
+            <div class="quiz-feedback" id="m6q1-feedback" data-correct-text="The tokens in the database are encrypted with AES-256-GCM. Without the ENCRYPTION_KEY (stored in a separate file, ~/.orbit/.env), the tokens are unreadable gibberish. This is exactly why separating keys from data matters." data-incorrect-text="The database does contain the tokens, but they're encrypted. Without the ENCRYPTION_KEY from the .env file, they're useless. This separation — encrypted data in one place, decryption key in another — is a core security pattern."></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m6')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m6')">Try Again</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODULE 7 — THE BIG PICTURE
+     ═══════════════════════════════════════════════════════ -->
+<section class="module" id="module-7" style="background: var(--color-bg-warm)">
+  <div class="module-content">
+    <header class="module-header animate-in">
+      <span class="module-number">07</span>
+      <h1 class="module-title">The Big Picture</h1>
+      <p class="module-subtitle">How everything connects — and what you now know to build something like this</p>
+    </header>
+
+    <div class="module-body">
+      <section class="screen animate-in">
+        <h2 class="screen-heading">The Full Architecture</h2>
+        <p>Let's zoom out and see how every piece we've learned fits together:</p>
+
+        <div class="flow-animation" id="flow-arch">
+          <div class="flow-actors">
+            <div class="flow-actor" id="arch-browser">
+              <div class="flow-actor-icon" style="background: var(--color-actor-1)">🖥️</div>
+              <span>Browser</span>
+            </div>
+            <div class="flow-actor" id="arch-api">
+              <div class="flow-actor-icon" style="background: var(--color-actor-2)">⚡</div>
+              <span>API Routes</span>
+            </div>
+            <div class="flow-actor" id="arch-services">
+              <div class="flow-actor-icon" style="background: var(--color-actor-3)">⚙️</div>
+              <span>Services</span>
+            </div>
+            <div class="flow-actor" id="arch-db">
+              <div class="flow-actor-icon" style="background: var(--color-actor-4)">🗄️</div>
+              <span>SQLite DB</span>
+            </div>
+            <div class="flow-actor" id="arch-external">
+              <div class="flow-actor-icon" style="background: var(--color-actor-5)">☁️</div>
+              <span>External APIs</span>
+            </div>
+          </div>
+          <div class="flow-step-label" id="flow-arch-label">Click "Next Step" to trace a request through the full stack</div>
+          <div class="flow-controls">
+            <button onclick="flowArchNext()">Next Step</button>
+            <button onclick="flowArchReset()">Restart</button>
+            <span class="flow-progress" id="flow-arch-progress">Step 0 / 6</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">Patterns You Now Understand</h2>
+        <p>Every concept from this course shows up in real-world software. Here's your vocabulary cheat sheet:</p>
+
+        <div class="pattern-cards stagger-children">
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-1)">
+            <div class="pattern-icon" style="background: var(--color-actor-1)">🏗️</div>
+            <h4 class="pattern-title">Local-First</h4>
+            <p class="pattern-desc">"Store data on the user's device, not in the cloud." Use when privacy matters or you want zero infrastructure costs.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-2)">
+            <div class="pattern-icon" style="background: var(--color-actor-2)">🔄</div>
+            <h4 class="pattern-title">Pipeline Pattern</h4>
+            <p class="pattern-desc">"Process data through a series of independent steps." Each step fails gracefully without breaking the others.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-3)">
+            <div class="pattern-icon" style="background: var(--color-actor-3)">🤖</div>
+            <h4 class="pattern-title">Model Selection</h4>
+            <p class="pattern-desc">"Use the cheapest AI model that's good enough." Fast model for simple tasks, powerful model for reasoning.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-4)">
+            <div class="pattern-icon" style="background: var(--color-actor-4)">📉</div>
+            <h4 class="pattern-title">Time-Decay Scoring</h4>
+            <p class="pattern-desc">"Weight recent events higher than old ones." Used in search engines, recommendations, and relationship scores.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-actor-5)">
+            <div class="pattern-icon" style="background: var(--color-actor-5)">🔐</div>
+            <h4 class="pattern-title">Defense in Depth</h4>
+            <p class="pattern-desc">"Layer multiple security measures." Encryption + localhost + file permissions. If one fails, others hold.</p>
+          </div>
+          <div class="pattern-card animate-in" style="border-top: 3px solid var(--color-info)">
+            <div class="pattern-icon" style="background: var(--color-info)">📋</div>
+            <h4 class="pattern-title">Structured Output</h4>
+            <p class="pattern-desc">"Tell the AI what format to return." Define JSON schemas in system prompts so code can reliably parse responses.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen animate-in">
+        <h2 class="screen-heading">What You Can Do Now</h2>
+        <p>You're no longer a black-box user. You understand the machinery. Here's what that unlocks:</p>
+
+        <div class="step-cards stagger-children">
+          <div class="step-card animate-in">
+            <div class="step-num" style="background: var(--color-actor-5)">✓</div>
+            <div class="step-body">
+              <strong>Point AI to the right file</strong>
+              <p>"Change the warmth calculation in src/services/warmth.service.ts" — not a vague "change the scoring."</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num" style="background: var(--color-actor-2)">✓</div>
+            <div class="step-body">
+              <strong>Debug with intuition</strong>
+              <p>"Scores aren't updating" → probably haven't run the sync pipeline. "Summaries are wrong" → check the system prompt.</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num" style="background: var(--color-actor-3)">✓</div>
+            <div class="step-body">
+              <strong>Request patterns by name</strong>
+              <p>"Add try/catch around each step." "Use time-decay scoring." "Pick GPT-4o-mini for this — it's just classification."</p>
+            </div>
+          </div>
+          <div class="step-card animate-in">
+            <div class="step-num" style="background: var(--color-actor-4)">✓</div>
+            <div class="step-body">
+              <strong>Evaluate AI suggestions</strong>
+              <p>When AI suggests putting business logic in a page component, you know to say: "No, put it in the service layer."</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Final Quiz -->
+      <section class="screen animate-in" id="quiz-m7">
+        <h2 class="screen-heading">Final Challenge</h2>
+        <div class="quiz-container">
+          <div class="quiz-question-block" data-question="m7q1" data-correct="m7q1-b">
+            <div class="scenario-block">
+              <span class="scenario-label">Scenario</span>
+              <p>You want to build a similar app that tracks your Twitter/X interactions instead of email. Which architectural decision from Orbit would you keep, and which would you change?</p>
+            </div>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="m7q1-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Keep everything the same — just swap the Gmail API for the Twitter API</span>
+              </button>
+              <button class="quiz-option" data-value="m7q1-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Keep the pipeline pattern, warmth scoring, and AI layers — but add a new sync service for Twitter alongside the Gmail one</span>
+              </button>
+              <button class="quiz-option" data-value="m7q1-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>Start from scratch — Twitter is too different from email</span>
+              </button>
+            </div>
+            <div class="quiz-feedback" id="m7q1-feedback" data-correct-text="This is the power of separation of concerns. The pipeline pattern, warmth scoring, and AI layers are data-source agnostic — they work with any interaction type. You'd add a new Twitter sync service in src/services/ that creates the same 'interaction' records, and everything downstream works automatically." data-incorrect-text="The beauty of Orbit's architecture is that most of it is data-source agnostic. The pipeline, warmth scoring, and AI layers all work with generic 'interactions.' You'd add a new sync service for Twitter — everything else stays the same."></div>
+          </div>
+
+          <div class="quiz-question-block" data-question="m7q2" data-correct="m7q2-a">
+            <div class="scenario-block">
+              <span class="scenario-label">Scenario</span>
+              <p>Orbit's AI chat feature loads your top 100 contacts into the system prompt so the AI knows who your contacts are. A user has 5,000 contacts. What's the potential problem?</p>
+            </div>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="m7q2-a" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The system prompt might exceed the AI model's token limit — 100 contacts is already a lot of context</span>
+              </button>
+              <button class="quiz-option" data-value="m7q2-b" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The database query would be too slow</span>
+              </button>
+              <button class="quiz-option" data-value="m7q2-c" onclick="selectOption(this)">
+                <div class="quiz-option-radio"></div>
+                <span>The encryption would fail with too many contacts</span>
+              </button>
+            </div>
+            <div class="quiz-feedback" id="m7q2-feedback" data-correct-text="AI models have a maximum 'context window' — the total amount of text they can process at once. Stuffing 100+ contacts into the system prompt consumes a huge chunk of that window. For 5,000 contacts, you'd need a different approach — like searching for relevant contacts first, then only including those in the prompt. This is called 'retrieval-augmented generation' (RAG)." data-incorrect-text="The issue is AI token limits. Each contact's data in the system prompt uses tokens. 100 contacts already uses a lot of the context window. The fix would be retrieval-augmented generation (RAG) — search for relevant contacts first, then include only those."></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m7')">Check Answers</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m7')">Try Again</button>
+        </div>
+      </section>
+
+      <!-- Finale -->
+      <section class="screen animate-in" style="text-align: center; padding: var(--space-16) 0;">
+        <h2 class="screen-heading" style="font-size: var(--text-3xl);">You Made It! 🎓</h2>
+        <p style="font-size: var(--text-lg); max-width: 50ch; margin: 0 auto;">You now understand how a production AI application works — from the database to the API to the AI prompts to the encryption. Use this knowledge to build better, debug faster, and steer AI with confidence.</p>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  // ─── Scroll-triggered animations ──────────────────────
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+
+  document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
+
+  // ─── Stagger children ─────────────────────────────────
+  document.querySelectorAll('.stagger-children').forEach(parent => {
+    Array.from(parent.children).forEach((child, i) => {
+      child.style.setProperty('--stagger-index', i);
+    });
+  });
+
+  // ─── Progress bar ─────────────────────────────────────
+  const progressBar = document.getElementById('progress-bar');
+  function updateProgressBar() {
+    const scrollTop = window.scrollY;
+    const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+    progressBar.style.width = progress + '%';
+  }
+  window.addEventListener('scroll', () => requestAnimationFrame(updateProgressBar), { passive: true });
+
+  // ─── Navigation dots ──────────────────────────────────
+  const dots = document.querySelectorAll('.nav-dot');
+  const sections = ['hero','module-1','module-2','module-3','module-4','module-5','module-6','module-7'];
+
+  function updateNavDots() {
+    const scrollY = window.scrollY + window.innerHeight / 3;
+    let currentIdx = 0;
+    sections.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (el && el.offsetTop <= scrollY) currentIdx = i;
+    });
+    dots.forEach((dot, i) => {
+      dot.classList.remove('current');
+      if (i < currentIdx) dot.classList.add('visited');
+      if (i === currentIdx) { dot.classList.add('current'); dot.classList.remove('visited'); }
+    });
+  }
+  window.addEventListener('scroll', () => requestAnimationFrame(updateNavDots), { passive: true });
+
+  window.scrollToModule = function(id) {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // ─── Keyboard navigation ──────────────────────────────
+  document.addEventListener('keydown', (e) => {
+    if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      const scrollY = window.scrollY + window.innerHeight / 3;
+      let currentIdx = 0;
+      sections.forEach((id, i) => {
+        const el = document.getElementById(id);
+        if (el && el.offsetTop <= scrollY) currentIdx = i;
+      });
+      if (currentIdx < sections.length - 1) {
+        scrollToModule(sections[currentIdx + 1]);
+        e.preventDefault();
+      }
+    }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      const scrollY = window.scrollY + window.innerHeight / 3;
+      let currentIdx = 0;
+      sections.forEach((id, i) => {
+        const el = document.getElementById(id);
+        if (el && el.offsetTop <= scrollY) currentIdx = i;
+      });
+      if (currentIdx > 0) {
+        scrollToModule(sections[currentIdx - 1]);
+        e.preventDefault();
+      }
+    }
+  });
+
+  // ─── Quiz system ──────────────────────────────────────
+  window.selectOption = function(btn) {
+    const block = btn.closest('.quiz-question-block');
+    if (block.querySelector('.quiz-option[disabled]')) return;
+    block.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('selected'));
+    btn.classList.add('selected');
+  };
+
+  window.checkQuiz = function(sectionId) {
+    const container = document.querySelector('#' + sectionId + ' .quiz-container');
+    const questions = container.querySelectorAll('.quiz-question-block');
+    questions.forEach(q => {
+      const selected = q.querySelector('.quiz-option.selected');
+      const feedback = q.querySelector('.quiz-feedback');
+      const correctValue = q.dataset.correct;
+      if (!selected) {
+        feedback.textContent = 'Pick an answer first!';
+        feedback.className = 'quiz-feedback show warning';
+        return;
+      }
+      if (selected.dataset.value === correctValue) {
+        selected.classList.add('correct');
+        feedback.innerHTML = '<strong>Exactly!</strong> ' + feedback.dataset.correctText;
+        feedback.className = 'quiz-feedback show success';
+      } else {
+        selected.classList.add('incorrect');
+        q.querySelector('[data-value="' + correctValue + '"]').classList.add('correct');
+        feedback.innerHTML = '<strong>Not quite.</strong> ' + feedback.dataset.incorrectText;
+        feedback.className = 'quiz-feedback show error';
+      }
+      q.querySelectorAll('.quiz-option').forEach(o => o.disabled = true);
+    });
+  };
+
+  window.resetQuiz = function(sectionId) {
+    const container = document.querySelector('#' + sectionId + ' .quiz-container');
+    container.querySelectorAll('.quiz-option').forEach(o => {
+      o.classList.remove('selected','correct','incorrect');
+      o.disabled = false;
+    });
+    container.querySelectorAll('.quiz-feedback').forEach(f => {
+      f.className = 'quiz-feedback';
+      f.innerHTML = '';
+    });
+  };
+
+  // ─── Sync Flow Animation ──────────────────────────────
+  var syncFlowStep = 0;
+  const syncFlowSteps = [
+    { highlight: 'flow-gmail', label: 'Step 1: Orbit fetches new emails from Gmail, filtering out newsletters and automated messages' },
+    { highlight: 'flow-calendar', label: 'Step 2: Orbit pulls calendar events and extracts attendees from each meeting' },
+    { highlight: 'flow-db', label: 'Step 3: New emails and meetings are saved to the local SQLite database as "interactions"' },
+    { highlight: 'flow-ai', label: 'Step 4: GPT-4o-mini summarizes each interaction, then GPT-4o generates follow-up suggestions' },
+    { highlight: 'flow-warmth', label: 'Step 5: Warmth scores recalculate for every contact based on interaction type, frequency, and freshness' },
+  ];
+
+  window.flowSyncNext = function() {
+    if (syncFlowStep >= syncFlowSteps.length) return;
+    const step = syncFlowSteps[syncFlowStep];
+    document.querySelectorAll('#flow-sync .flow-actor').forEach(a => a.classList.remove('active'));
+    document.getElementById(step.highlight).classList.add('active');
+    document.getElementById('flow-sync-label').textContent = step.label;
+    syncFlowStep++;
+    document.getElementById('flow-sync-progress').textContent = 'Step ' + syncFlowStep + ' / ' + syncFlowSteps.length;
+  };
+
+  window.flowSyncReset = function() {
+    syncFlowStep = 0;
+    document.querySelectorAll('#flow-sync .flow-actor').forEach(a => a.classList.remove('active'));
+    document.getElementById('flow-sync-label').textContent = 'Click "Next Step" to trace the pipeline';
+    document.getElementById('flow-sync-progress').textContent = 'Step 0 / ' + syncFlowSteps.length;
+  };
+
+  // ─── Architecture Flow Animation ──────────────────────
+  var archFlowStep = 0;
+  const archFlowSteps = [
+    { highlight: 'arch-browser', label: 'You click "Analyze" — the browser sends a request to the local server' },
+    { highlight: 'arch-api', label: 'The API route receives the request, authenticates you, and starts the pipeline' },
+    { highlight: 'arch-external', label: 'Services call Google APIs (Gmail, Calendar) to fetch your latest emails and meetings' },
+    { highlight: 'arch-services', label: 'Services process the data: filter junk, call AI for summaries and suggestions' },
+    { highlight: 'arch-db', label: 'Everything is saved to the local SQLite database — interactions, summaries, scores' },
+    { highlight: 'arch-browser', label: 'The API returns results and the browser updates the dashboard with fresh data' },
+  ];
+
+  window.flowArchNext = function() {
+    if (archFlowStep >= archFlowSteps.length) return;
+    const step = archFlowSteps[archFlowStep];
+    document.querySelectorAll('#flow-arch .flow-actor').forEach(a => a.classList.remove('active'));
+    document.getElementById(step.highlight).classList.add('active');
+    document.getElementById('flow-arch-label').textContent = step.label;
+    archFlowStep++;
+    document.getElementById('flow-arch-progress').textContent = 'Step ' + archFlowStep + ' / ' + archFlowSteps.length;
+  };
+
+  window.flowArchReset = function() {
+    archFlowStep = 0;
+    document.querySelectorAll('#flow-arch .flow-actor').forEach(a => a.classList.remove('active'));
+    document.getElementById('flow-arch-label').textContent = 'Click "Next Step" to trace a request through the full stack';
+    document.getElementById('flow-arch-progress').textContent = 'Step 0 / ' + archFlowSteps.length;
+  };
+
+  // ─── Group Chat Animation (Sync Pipeline) ────────────
+  var syncChatIndex = 0;
+  const syncChatMessages = document.querySelectorAll('#chat-sync-messages .chat-message');
+  const syncChatActors = {
+    'dashboard': { initials: 'D', color: 'var(--color-actor-1)' },
+    'api':       { initials: 'A', color: 'var(--color-actor-2)' },
+    'gmail':     { initials: 'G', color: 'var(--color-actor-4)' },
+    'summarizer':{ initials: 'S', color: 'var(--color-actor-3)' },
+    'actions':   { initials: 'AI', color: 'var(--color-actor-5)' },
+    'warmth':    { initials: 'W', color: 'var(--color-actor-1)' },
+  };
+
+  window.playSyncChatNext = function() {
+    if (syncChatIndex >= syncChatMessages.length) return;
+    const msg = syncChatMessages[syncChatIndex];
+    const sender = msg.dataset.sender;
+    const actor = syncChatActors[sender] || { initials: '?', color: 'var(--color-text-muted)' };
+
+    const typing = document.getElementById('chat-sync-typing');
+    const avatar = document.getElementById('chat-sync-typing-avatar');
+    avatar.textContent = actor.initials;
+    avatar.style.background = actor.color;
+    typing.style.display = 'flex';
+
+    setTimeout(() => {
+      typing.style.display = 'none';
+      msg.style.display = 'flex';
+      msg.style.animation = 'fadeSlideUp 0.3s var(--ease-out)';
+      syncChatIndex++;
+      document.getElementById('chat-sync-progress').textContent = syncChatIndex + ' / ' + syncChatMessages.length + ' messages';
+      // Auto-scroll
+      const container = document.getElementById('chat-sync-messages');
+      container.scrollTop = container.scrollHeight;
+    }, 800);
+  };
+
+  var syncChatInterval = null;
+  window.playSyncChatAll = function() {
+    if (syncChatInterval) clearInterval(syncChatInterval);
+    syncChatInterval = setInterval(() => {
+      if (syncChatIndex >= syncChatMessages.length) { clearInterval(syncChatInterval); syncChatInterval = null; return; }
+      playSyncChatNext();
+    }, 1400);
+  };
+
+  window.resetSyncChat = function() {
+    if (syncChatInterval) { clearInterval(syncChatInterval); syncChatInterval = null; }
+    syncChatIndex = 0;
+    syncChatMessages.forEach(m => { m.style.display = 'none'; m.style.animation = ''; });
+    document.getElementById('chat-sync-typing').style.display = 'none';
+    document.getElementById('chat-sync-progress').textContent = '0 / ' + syncChatMessages.length + ' messages';
+  };
+
+  // ─── Glossary Tooltips ────────────────────────────────
+  let activeTooltip = null;
+
+  function positionTooltip(term, tip) {
+    const rect = term.getBoundingClientRect();
+    const tipWidth = Math.min(320, window.innerWidth * 0.8);
+    tip.style.width = tipWidth + 'px';
+    let left = rect.left + rect.width / 2 - tipWidth / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - tipWidth - 8));
+    tip.style.left = left + 'px';
+
+    document.body.appendChild(tip);
+    const tipHeight = tip.offsetHeight;
+
+    if (rect.top - tipHeight - 8 < 0) {
+      tip.style.top = (rect.bottom + 8) + 'px';
+      tip.classList.add('flip');
+    } else {
+      tip.style.top = (rect.top - tipHeight - 8) + 'px';
+      tip.classList.remove('flip');
+    }
+  }
+
+  document.querySelectorAll('.term').forEach(term => {
+    const tip = document.createElement('span');
+    tip.className = 'term-tooltip';
+    tip.textContent = term.dataset.definition;
+
+    term.addEventListener('mouseenter', () => {
+      if (activeTooltip && activeTooltip !== tip) {
+        activeTooltip.classList.remove('visible');
+        if (activeTooltip.parentNode) activeTooltip.remove();
+      }
+      positionTooltip(term, tip);
+      requestAnimationFrame(() => tip.classList.add('visible'));
+      activeTooltip = tip;
+    });
+
+    term.addEventListener('mouseleave', () => {
+      tip.classList.remove('visible');
+      setTimeout(() => { if (!tip.classList.contains('visible') && tip.parentNode) tip.remove(); }, 150);
+      activeTooltip = null;
+    });
+
+    term.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeTooltip && activeTooltip !== tip) {
+        activeTooltip.classList.remove('visible');
+        if (activeTooltip.parentNode) activeTooltip.remove();
+      }
+      if (tip.classList.contains('visible')) {
+        tip.classList.remove('visible');
+        if (tip.parentNode) tip.remove();
+        activeTooltip = null;
+      } else {
+        positionTooltip(term, tip);
+        requestAnimationFrame(() => tip.classList.add('visible'));
+        activeTooltip = tip;
+      }
+    });
+  });
+
+  document.addEventListener('click', () => {
+    if (activeTooltip) {
+      activeTooltip.classList.remove('visible');
+      if (activeTooltip.parentNode) activeTooltip.remove();
+      activeTooltip = null;
+    }
+  });
+
+  // ─── Initial state ────────────────────────────────────
+  updateProgressBar();
+  updateNavDots();
+})();
+</script>
+</body>
+</html>

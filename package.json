@@ -13,8 +13,6 @@
     "src/",
     "Install Orbit.bat",
     "Launch Orbit.bat",
-    "Install Orbit.command",
-    "Launch Orbit.command",
     "next.config.js",
     "tsconfig.json",
     "tailwind.config.ts",
@@ -58,6 +56,6 @@
     "typescript": "^5.5.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": "^18.0.0 || ^20.0.0 || ^22.0.0"
   }
 }

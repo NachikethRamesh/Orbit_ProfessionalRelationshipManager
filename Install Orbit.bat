@@ -27,6 +27,24 @@ goto :check_portable
 
 :found_system_node
 for /f "tokens=*" %%i in ('node -v') do set "NODE_VER=%%i"
+
+:: Extract major version number (e.g. "v22.16.0" → "22")
+set "VER_STR=!NODE_VER:~1!"
+for /f "tokens=1 delims=." %%m in ("!VER_STR!") do set "MAJOR=%%m"
+
+:: Only accept LTS versions: 18, 20, 22
+if "!MAJOR!"=="18" goto :system_node_ok
+if "!MAJOR!"=="20" goto :system_node_ok
+if "!MAJOR!"=="22" goto :system_node_ok
+
+:: Unsupported version — warn and fall through to portable download
+echo   Found Node.js !NODE_VER! but this version is not supported.
+echo   Orbit requires Node.js 18, 20, or 22 LTS.
+echo   A compatible version will be downloaded automatically.
+echo.
+goto :check_portable
+
+:system_node_ok
 echo   Found Node.js !NODE_VER! on your system.
 set "NODE=node"
 :: Use the npm that lives next to the system node executable (avoids local shims)
@@ -48,12 +66,12 @@ if exist ".\runtime\node\node.exe" (
 )
 
 :: 3. Download portable Node.js
-echo   Node.js is not installed. Downloading portable Node.js v20.18.1...
+echo   Node.js is not installed. Downloading portable Node.js v22.16.0...
 echo   (This is a one-time download of ~30 MB)
 echo.
 
-set "NODE_URL=https://nodejs.org/dist/v20.18.1/node-v20.18.1-win-x64.zip"
-set "NODE_ZIP=%TEMP%\node-v20.18.1-win-x64.zip"
+set "NODE_URL=https://nodejs.org/dist/v22.16.0/node-v22.16.0-win-x64.zip"
+set "NODE_ZIP=%TEMP%\node-v22.16.0-win-x64.zip"
 
 :: Download using PowerShell
 echo   Downloading...
@@ -80,7 +98,7 @@ if %errorlevel% neq 0 (
 
 :: Move extracted folder to runtime\node
 if exist ".\runtime\node" rmdir /s /q ".\runtime\node"
-move ".\runtime\node-v20.18.1-win-x64" ".\runtime\node" >nul
+move ".\runtime\node-v22.16.0-win-x64" ".\runtime\node" >nul
 if %errorlevel% neq 0 (
     echo.
     echo   [ERROR] Could not set up Node.js runtime folder.
