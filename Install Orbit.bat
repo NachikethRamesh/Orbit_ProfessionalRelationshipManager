@@ -117,6 +117,11 @@ set "NPM=%~dp0runtime\node\npm.cmd"
 
 :node_ready
 
+:: When using portable Node, prepend it to PATH so npm and child processes
+:: use the correct Node.js version (not the system one).
+for %%F in ("!NODE!") do set "NODE_BIN_DIR=%%~dpF"
+set "PATH=!NODE_BIN_DIR!;!PATH!"
+
 :: Show version
 for /f "tokens=*" %%i in ('"%NODE%" -v') do echo   Using Node.js %%i
 echo.
