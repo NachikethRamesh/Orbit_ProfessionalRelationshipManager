@@ -23,14 +23,14 @@ import {
 import clsx from "clsx";
 
 const TABS = [
-  { key: "", label: "All" },
   { key: "pending", label: "Pending" },
   { key: "completed", label: "Completed" },
   { key: "dismissed", label: "Dismissed" },
 ] as const;
 
 export default function RemindersPage() {
-  const [activeTab, setActiveTab] = useState("");
+  const [activeTab, setActiveTab] = useState("pending");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const { data: reminders, isLoading, error } = useReminders(activeTab || undefined);
   const createReminder = useCreateReminder();
   const updateReminder = useUpdateReminder();
@@ -62,6 +62,21 @@ export default function RemindersPage() {
     updateReminder.mutate({ id: reminder.id, remind_at: baseDate.toISOString() });
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const handleDismissSelected = async () => {
+    for (const id of selectedIds) {
+      updateReminder.mutate({ id, status: "dismissed" });
+    }
+    setSelectedIds(new Set());
+  };
+
   const isOverdue = (reminder: import("@/lib/types").Reminder) => {
     return reminder.status === "pending" && new Date(reminder.remind_at) < new Date();
   };
@@ -83,14 +98,26 @@ export default function RemindersPage() {
       {/* Header */}
       <div className="flex items-center justify-between px-6 pt-6 pb-4 shrink-0">
         <span className="text-[10px] uppercase tracking-widest text-white/45 font-medium">Reminders</span>
-        <button
-          onClick={() => setShowForm((p) => !p)}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[10px] uppercase tracking-widest text-white/90 bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.08] hover:border-white/[0.15] transition-all"
-          style={{ boxShadow: "0 2px 10px rgba(0,0,0,0.2)" }}
-        >
-          {showForm ? <X className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
-          {showForm ? "Cancel" : "New Reminder"}
-        </button>
+        <div className="flex items-center gap-2">
+          {selectedIds.size > 0 && (
+            <button
+              onClick={handleDismissSelected}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[10px] uppercase tracking-widest text-red-400/80 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-all"
+              style={{ boxShadow: "0 2px 10px rgba(0,0,0,0.2)" }}
+            >
+              <X className="w-3 h-3" />
+              Dismiss Selected ({selectedIds.size})
+            </button>
+          )}
+          <button
+            onClick={() => setShowForm((p) => !p)}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[10px] uppercase tracking-widest text-white/90 bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.08] hover:border-white/[0.15] transition-all"
+            style={{ boxShadow: "0 2px 10px rgba(0,0,0,0.2)" }}
+          >
+            {showForm ? <X className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+            {showForm ? "Cancel" : "New Reminder"}
+          </button>
+        </div>
       </div>
 
       {/* Create form */}
@@ -150,7 +177,7 @@ export default function RemindersPage() {
           {TABS.map(({ key, label }) => (
             <button
               key={key}
-              onClick={() => setActiveTab(key)}
+              onClick={() => { setActiveTab(key); setSelectedIds(new Set()); }}
               className={clsx(
                 "px-3 py-1.5 text-[10px] uppercase tracking-widest font-medium rounded-md transition-colors",
                 activeTab === key
@@ -201,6 +228,16 @@ export default function RemindersPage() {
                     overdue ? "border-red-500/20 bg-red-500/[0.03]" : "border-white/[0.04] bg-white/[0.02] hover:bg-white/[0.04]"
                   )}
                 >
+                  {/* Checkbox for pending */}
+                  {reminder.status === "pending" && (
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(reminder.id)}
+                      onChange={() => toggleSelect(reminder.id)}
+                      className="w-3.5 h-3.5 shrink-0 accent-orange-500 cursor-pointer"
+                    />
+                  )}
+
                   {/* Type icon */}
                   {TypeIcon ? (
                     <TypeIcon className={clsx("w-3.5 h-3.5 shrink-0", parsed!.color.split(" ")[0])} />

@@ -204,6 +204,7 @@ export default function ContactsPage() {
                   } catch (e) {
                     setSyncResult(e instanceof Error ? e.message : "Sync failed");
                   }
+                  setTimeout(() => window.location.reload(), 1500);
                 } catch (e) {
                   setBuildResult(e instanceof Error ? e.message : "Failed");
                 }
@@ -242,11 +243,14 @@ export default function ContactsPage() {
                   setEnrichResult(null);
                   let enriched = 0;
                   try {
-                    for (const c of contacts) {
+                    for (let i = 0; i < contacts.length; i++) {
                       try {
-                        await enrichContact.mutateAsync(c.id);
+                        await enrichContact.mutateAsync(contacts[i].id);
                         enriched++;
                       } catch {}
+                      if (i < contacts.length - 1) {
+                        await new Promise((r) => setTimeout(r, 1500));
+                      }
                     }
                     setEnrichResult(`${enriched} contacts enriched`);
                   } catch (e) {

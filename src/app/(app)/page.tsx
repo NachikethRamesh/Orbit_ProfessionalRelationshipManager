@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useDashboard } from "@/hooks/useDashboard";
 import { useUpdateSuggestion } from "@/hooks/useSuggestions";
 import { apiClient } from "@/lib/api";
@@ -20,6 +21,7 @@ import clsx from "clsx";
 export default function DashboardPage() {
   const { data, isLoading, error } = useDashboard();
   const updateSuggestion = useUpdateSuggestion();
+  const queryClient = useQueryClient();
 
   const [analyzing, setAnalyzing] = useState(false);
   const [analyzeResult, setAnalyzeResult] = useState<string | null>(null);
@@ -28,8 +30,18 @@ export default function DashboardPage() {
     setAnalyzing(true);
     setAnalyzeResult(null);
     try {
-      const result = await apiClient.post<{ message: string }>("/api/sync/analyze", {});
-      setAnalyzeResult(result.message ?? "Analysis complete!");
+      const result = await apiClient.post<{
+        success: boolean;
+        results: { synced: { gmail: number; calendar: number }; summarized: number; actionItems: number; warmthUpdated: boolean };
+      }>("/api/sync/analyze", {});
+      const r = result.results;
+      const parts: string[] = [];
+      if (r.synced.gmail > 0 || r.synced.calendar > 0) parts.push(`Synced ${r.synced.gmail} emails, ${r.synced.calendar} events`);
+      if (r.summarized > 0) parts.push(`${r.summarized} interactions summarized`);
+      if (r.actionItems > 0) parts.push(`${r.actionItems} suggestions generated`);
+      if (r.warmthUpdated) parts.push("Warmth scores updated");
+      setAnalyzeResult(parts.length > 0 ? parts.join(" \u00b7 ") : "Analysis complete \u2014 no new activity found.");
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     } catch (err) {
       setAnalyzeResult(err instanceof Error ? err.message : "Analysis failed");
     } finally {

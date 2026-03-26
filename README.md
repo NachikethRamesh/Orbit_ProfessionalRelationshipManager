@@ -59,8 +59,10 @@ That's it — save your keys and you're good to go.
 - **Summarizes conversations** so you can quickly recall what you talked about
 - **Suggests follow-ups** — reminds you to reach out when relationships go quiet
 - **Warmth scores** — see at a glance who you're close with and who's drifting
-- **AI chat** — ask questions like "When did I last talk to Sarah?" or "Who works at Acme?"
-- **Contact enrichment** — optionally pulls in background info on your contacts
+- **AI chat with actions** — ask questions like "When did I last talk to Sarah?" or tell it to "Create a reminder to follow up with John next Monday" — the chatbot can create, update, and delete both reminders and contacts directly
+- **Contact enrichment** — optionally pulls in background info on your contacts (with built-in rate limiting to avoid API throttling)
+- **Dashboard analysis** — one-click Analyze syncs your email, summarizes new interactions, generates action items, and updates warmth scores
+- **Bulk reminder management** — select and dismiss multiple reminders at once from the Reminders page
 
 ## What You'll Need
 
