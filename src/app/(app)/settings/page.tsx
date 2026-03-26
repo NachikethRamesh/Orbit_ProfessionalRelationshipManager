@@ -177,12 +177,13 @@ export default function SettingsPage() {
                       placeholder={meta.placeholder}
                       onChange={(e) => handleChange(meta.key, e.target.value)}
                       readOnly={meta.readOnly}
+                      name={`orbit-${meta.key}`}
                       className={`flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm font-mono placeholder:text-white/20 focus:outline-none transition-colors ${
                         meta.readOnly
                           ? "text-white/40 cursor-not-allowed"
                           : "text-white/80 focus:border-orange-400/40"
                       }`}
-                      autoComplete="off"
+                      autoComplete="one-time-code"
                       spellCheck={false}
                     />
                     {meta.secret && !meta.readOnly && (
