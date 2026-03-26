@@ -138,8 +138,9 @@ export async function enrichContact(userId: string, contactId: string): Promise<
   const queryParts = [contact.name, contact.email];
   if (contact.company) queryParts.push(contact.company);
 
-  const exaApiKey = process.env.EXA_API_KEY;
-  if (!exaApiKey) throw new Error("EXA_API_KEY environment variable is not set.");
+  const { getEnv } = await import("@/lib/env");
+  const exaApiKey = getEnv("EXA_API_KEY");
+  if (!exaApiKey) throw new Error("EXA_API_KEY is not set. Add it in Settings.");
 
   const response = await fetch(EXA_API_URL, {
     method: "POST",

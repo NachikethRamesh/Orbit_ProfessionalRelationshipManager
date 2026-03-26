@@ -11,6 +11,7 @@
  *   - ciphertext = the encrypted data
  */
 import crypto from "crypto";
+import { getEnv } from "@/lib/env";
 
 /* Algorithm constants */
 const ALGORITHM = "aes-256-gcm";
@@ -18,13 +19,13 @@ const IV_LENGTH = 12; // 12 bytes is the recommended IV length for GCM
 const AUTH_TAG_LENGTH = 16; // 16 bytes for the authentication tag
 
 /**
- * Reads the 32-byte hex encryption key from the environment.
+ * Reads the 32-byte hex encryption key from ~/.orbit/.env.
  * Throws immediately if the key is missing or malformed.
  */
 function getKey(): Buffer {
-  const hex = process.env.ENCRYPTION_KEY;
+  const hex = getEnv("ENCRYPTION_KEY");
   if (!hex) {
-    throw new Error("ENCRYPTION_KEY environment variable is not set.");
+    throw new Error("ENCRYPTION_KEY is not set. Run setup first.");
   }
   /* Convert the hex string to a 32-byte buffer */
   const key = Buffer.from(hex, "hex");

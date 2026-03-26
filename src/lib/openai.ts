@@ -1,27 +1,24 @@
 /**
  * OpenAI Client (Server-only)
  *
- * Lazily creates an OpenAI client so the app can build and start
- * even when OPENAI_API_KEY is not yet set. The key is only required
- * when an AI feature is actually called.
+ * Creates an OpenAI client that always reads the API key from
+ * ~/.orbit/.env so it picks up keys saved via Settings without
+ * requiring a server restart.
  *
  * DO NOT import this module from client components — the API key
  * must never be exposed to the browser.
  */
 import OpenAI from "openai";
-
-/** Cached client instance — created on first call to getOpenAI() */
-let _client: OpenAI | null = null;
+import { getEnv } from "@/lib/env";
 
 /**
- * Returns the shared OpenAI client, creating it on first use.
+ * Returns a fresh OpenAI client using the latest key from disk.
  * Throws a clear error if OPENAI_API_KEY is missing at call time.
  */
 export function getOpenAI(): OpenAI {
-  if (!_client) {
-    _client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY || "missing-key",
-    });
+  const apiKey = getEnv("OPENAI_API_KEY");
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is not set. Add it in Settings.");
   }
-  return _client;
+  return new OpenAI({ apiKey });
 }
