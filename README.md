@@ -10,15 +10,14 @@ Built by [Nachiketh Ramesh](https://nachikethramesh.com)
 
 ## Quick Install (Windows)
 
-> **Just two double-clicks. No terminal needed.**
+> **One double-click. No terminal needed.**
 
 1. **[Download this repo](https://github.com/NachikethRamesh/Orbit_ProfessionalRelationshipManager/archive/refs/heads/main.zip)** and unzip it (or `git clone`)
-2. **Double-click `Install Orbit.bat`** — installs dependencies, runs setup, and builds the app
-3. **Double-click `Launch Orbit.bat`** — starts Orbit and opens it in your browser
+2. **Double-click `Launcher.bat`**
 
-That's it. `Install Orbit.bat` only needs to run once. After that, just use `Launch Orbit.bat` whenever you want to open Orbit.
+That's it. The first time you run it, Launcher.bat will automatically install dependencies, set up the database, build the app, and then launch Orbit. Every time after that, it just launches Orbit instantly.
 
-> **No Node.js required.** The installer will automatically download a portable copy if you don't have it or if your installed version isn't compatible. Orbit supports Node.js 18, 20, or 22 (LTS versions only).
+> **No Node.js required.** The launcher will automatically download a portable copy if you don't have it or if your installed version isn't compatible. Orbit supports Node.js 18, 20, or 22 (LTS versions only).
 
 ---
 
